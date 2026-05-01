@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>银行股8维评分器</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+:root{
+  --bg:#f5f6f8;--s1:#ffffff;--s2:#f0f1f4;--border:#e0e2e8;--border2:#c8cad4;
+  --text:#1a1a2e;--t2:#3a3a5c;--t3:#7a7a9a;
+  --gold:#c8860a;--green:#16a34a;--red:#dc2626;--blue:#2563eb;
+  --font:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
+#splash.hide{opacity:0;pointer-events:none;}
+.sp-logo{font-size:22px;font-weight:700;color:var(--gold);letter-spacing:5px;}
+.sp-sub{color:var(--t3);font-size:11px;letter-spacing:2px;}
+.sp-bar{width:220px;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.sp-fill{height:100%;background:var(--gold);width:0;transition:width .3s;}
+#sp-msg{color:var(--t3);font-size:11px;}
+
+/* HEADER */
+.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:8px;}
+.logo{font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+.logo em{color:var(--t3);font-style:normal;font-weight:400;font-size:11px;}
+.hd-r{display:flex;align-items:center;gap:10px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);}
+.live-dot.on{background:var(--green);box-shadow:0 0 8px var(--green);}
+.live-dot.fail{background:var(--red);}
+#uptime{color:var(--t3);font-size:10px;}
+.rbtn{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:6px 12px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:11px;transition:all .2s;}
+.rbtn:hover{border-color:var(--gold);color:var(--gold);}
+.rbtn:disabled{opacity:.4;cursor:default;}
+
+/* TABS */
+.tabs{display:flex;background:var(--s2);border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:11px 8px;text-align:center;font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* STATS */
+.stats{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.stats::-webkit-scrollbar{display:none;}
+.st{flex:1;min-width:64px;padding:8px 6px;border-right:1px solid var(--border);text-align:center;}
+.st-l{color:var(--t3);font-size:9px;margin-bottom:3px;}
+.st-v{font-size:13px;font-weight:700;}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:7px;padding:9px 13px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+.srch{flex:1;min-width:120px;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 11px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
+.srch::placeholder{color:var(--t3);}
+.srch:focus{border-color:var(--gold);}
+.fb{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:6px 10px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .2s;white-space:nowrap;}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,.07);}
+
+/* NOTICE */
+.notice{margin:8px 13px;padding:10px 13px;border-radius:5px;font-size:11px;line-height:1.8;display:none;white-space:pre-line;}
+.notice.warn{background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.3);color:#92600a;}
+.notice.err{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.3);color:#b91c1c;}
+
+/* TABLE */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:620px;}
+thead{position:sticky;top:0;z-index:10;}
+th{background:var(--s1);color:var(--t3);padding:8px 9px;text-align:right;font-size:10px;font-weight:600;border-bottom:2px solid var(--border2);cursor:pointer;white-space:nowrap;user-select:none;transition:color .15s;}
+th:first-child{text-align:left;padding-left:13px;}
+th.sk,th:hover{color:var(--gold);}
+td{padding:8px 9px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap;color:var(--t2);}
+td:first-child{text-align:left;padding-left:13px;}
+tr{cursor:pointer;}
+tr:hover td{background:rgba(200,134,10,.06);}
+tr.sel td{background:rgba(200,134,10,.1);}
+.bn{font-weight:700;color:var(--text);font-size:13px;}
+.bc{color:var(--t3);font-size:9px;display:block;margin-top:1px;}
+.tag{display:inline-block;padding:1px 5px;border-radius:2px;font-size:8px;font-weight:700;margin-left:4px;vertical-align:middle;}
+.tg-s{background:rgba(200,134,10,.15);color:#92600a;}
+.tg-c{background:rgba(37,99,235,.12);color:#1d4ed8;}
+.ind{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.ind-on{background:var(--green);}
+.ind-off{background:var(--t3);}
+
+/* SCORE BADGE */
+.sbadge{display:inline-block;min-width:28px;padding:2px 6px;border-radius:4px;font-weight:700;font-size:12px;text-align:center;}
+
+/* DRAWER */
+#dw{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--s1);border-top:2px solid var(--gold);border-radius:14px 14px 0 0;transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);max-height:92vh;overflow-y:auto;}
+#dw.open{transform:translateY(0);}
+.grip{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:10px auto 2px;}
+.dw-x{position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--t3);font-size:24px;cursor:pointer;line-height:1;padding:0 6px;}
+.dw-body{padding:6px 15px 48px;}
+
+/* DETAIL */
+.dh{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:13px;margin-bottom:13px;border-bottom:1px solid var(--border);}
+.dh-l{}
+.dh-name{font-size:20px;font-weight:700;}
+.dh-code{color:var(--t3);font-size:10px;margin-top:3px;}
+.dh-r{text-align:right;}
+.dh-price{font-size:24px;font-weight:700;color:var(--gold);}
+.dh-chg{font-size:12px;margin-top:3px;}
+
+/* 8维雷达替代：条形 */
+.score-section{margin-bottom:16px;}
+.score-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.score-title{font-size:12px;font-weight:700;color:var(--t2);}
+.score-total{font-size:22px;font-weight:700;color:var(--gold);}
+.score-rank{font-size:11px;color:var(--t3);margin-top:1px;text-align:right;}
+.dim-list{display:flex;flex-direction:column;gap:7px;}
+.dim-row{display:flex;align-items:center;gap:8px;}
+.dim-name{color:var(--t3);font-size:10px;width:68px;flex-shrink:0;}
+.dim-bar-wrap{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.dim-bar{height:100%;border-radius:3px;transition:width .4s;}
+.dim-val{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0;}
+.dim-rank{color:var(--t3);font-size:10px;width:30px;text-align:right;flex-shrink:0;}
+
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;}
+.mc{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.mc.g{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04);}
+.mc.r{border-color:rgba(239,68,68,.25);}
+.mc-l{color:var(--t3);font-size:10px;font-weight:600;margin-bottom:4px;}
+.mc-v{font-size:16px;font-weight:700;}
+.mc-s{color:var(--t3);font-size:10px;margin-top:3px;}
+
+/* AI */
+.ai-box{background:var(--s2);border:1px solid var(--border2);border-radius:7px;padding:13px;}
+.ai-hd{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.ai-title{color:var(--t2);font-size:12px;font-weight:600;}
+.qps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.qp{background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;}
+.qp:hover{border-color:var(--gold);color:var(--gold);}
+.ai-resp{font-size:12px;line-height:1.9;color:var(--t2);white-space:pre-wrap;min-height:48px;}
+.ai-resp.dim{color:var(--t3);}
+.ai-row{display:flex;gap:7px;margin-top:10px;}
+.ai-inp{flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 11px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
+.ai-inp::placeholder{color:var(--t3);}
+.ai-inp:focus{border-color:var(--gold);}
+.ai-btn{background:var(--gold);border:none;color:#1a1000;padding:7px 15px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;}
+.ai-btn:disabled{opacity:.35;cursor:default;}
+
+/* SCORE TABLE TAB */
+.score-tab-wrap{padding:12px;}
+.score-tab-title{font-size:12px;color:var(--t3);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.score-table{}
+.score-table table{min-width:340px;}
+.score-table th{font-size:10px;}
+.score-table td{font-size:11px;}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="sp-logo">BANK · 8D</div>
+  <div class="sp-sub">银行股8维评分系统</div>
+  <div class="sp-bar"><div class="sp-fill" id="sp-fill"></div></div>
+  <div id="sp-msg">初始化...</div>
+</div>
+
+<div class="hd">
+  <div class="logo">BANK·8D <em>/ 评分系统</em></div>
+  <div class="hd-r">
+    <div class="live-dot" id="live-dot"></div>
+    <div id="uptime">--</div>
+    <button class="rbtn" id="rfBtn" onclick="loadData()">↻ 刷新</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab on" onclick="switchTab('rank')" id="tab-rank">综合排名</div>
+  <div class="tab" onclick="switchTab('score')" id="tab-score">8维明细</div>
+</div>
+
+<div class="stats">
+  <div class="st"><div class="st-l">银行数</div><div class="st-v" style="color:var(--gold)" id="p-n">42</div></div>
+  <div class="st"><div class="st-l">上涨</div><div class="st-v" style="color:var(--green)" id="p-u">—</div></div>
+  <div class="st"><div class="st-l">下跌</div><div class="st-v" style="color:var(--red)" id="p-d">—</div></div>
+  <div class="st"><div class="st-l">均PB</div><div class="st-v" id="p-pb">—</div></div>
+  <div class="st"><div class="st-l">均股息</div><div class="st-v" style="color:var(--gold)" id="p-dy">—</div></div>
+  <div class="st"><div class="st-l">均PE</div><div class="st-v" id="p-pe">—</div></div>
+</div>
+
+<div class="toolbar">
+  <input class="srch" id="srch" placeholder="搜索银行…" oninput="render()">
+  <button class="fb" onclick="tf('pb')">低PB</button>
+  <button class="fb" onclick="tf('div')">高股息</button>
+  <button class="fb" onclick="tf('roe')">优ROE</button>
+  <button class="fb" onclick="tf('top')">8维精选</button>
+</div>
+
+<div class="notice" id="notice"></div>
+
+<!-- 综合排名视图 -->
+<div id="view-rank">
+<div class="tw">
+<table>
+  <thead><tr>
+    <th onclick="sb('name')">银行</th>
+    <th onclick="sb('score8')" class="sk">8维分↑</th>
+    <th onclick="sb('price')">现价</th>
+    <th onclick="sb('chg')">涨跌</th>
+    <th onclick="sb('pb')">PB</th>
+    <th onclick="sb('dy')">股息%</th>
+    <th onclick="sb('roe')">ROE</th>
+    <th onclick="sb('npl')">不良%</th>
+    <th onclick="sb('pe')">PE</th>
+  </tr></thead>
+  <tbody id="tb-rank"></tbody>
+</table>
+</div>
+</div>
+
+<!-- 8维明细视图 -->
+<div id="view-score" style="display:none">
+<div class="score-tab-wrap">
+  <div class="score-tab-title">8维评分明细（分数越低越好，综合排名靠前）</div>
+  <div class="score-table">
+  <div class="tw">
+  <table>
+    <thead><tr>
+      <th onclick="sb2('name')">银行</th>
+      <th onclick="sb2('score8')" class="sk">总分</th>
+      <th onclick="sb2('r_pb')">PB排</th>
+      <th onclick="sb2('r_dy')">股息排</th>
+      <th onclick="sb2('r_lev')">负债排</th>
+      <th onclick="sb2('r_cap')">资本排</th>
+      <th onclick="sb2('r_npg')">增速排</th>
+      <th onclick="sb2('r_npl')">不良排</th>
+      <th onclick="sb2('r_prov')">拨备排</th>
+      <th onclick="sb2('r_roe')">ROE排</th>
+    </tr></thead>
+    <tbody id="tb-score"></tbody>
+  </table>
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- 详情抽屉 -->
+<div id="dw">
+  <div class="grip"></div>
+  <button class="dw-x" onclick="closeDw()">×</button>
+  <div class="dw-body" id="dwb"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// 基础数据 2025-05-26
+// [name,code,pb,dy,roe,npl,prov,pe,ed,lev,core,npg]
+// lev=杠杆负债率(资产负债率), core=核心资本充足率, npg=净利润增速
+// ══════════════════════════════════════════════════
+// 数据来源：2026年一季报 / 2025年报（取最新可得数据）
+// 更新时间：2026年5月1日
+// 字段：[name,code,pb,dy,roe,npl,prov,pe,lev,cap,npg]
+const BASE=[
+  // ── 国有六大行（2025年报）──
+  ["工商银行","601398", 0.72, 5.00, 9.40, 1.33, 214.91, 6.20, 92.12, 13.89,  1.60],
+  ["农业银行","601288", 0.78, 4.80,10.16, 1.30, 299.61, 5.70, 92.99, 11.23,  4.70],
+  ["建设银行","601939", 0.74, 4.80,10.50, 1.34, 233.60, 6.00, 92.03, 13.98,  1.50],
+  ["中国银行","601988", 0.70, 4.70, 9.80, 1.25, 200.60, 6.40, 91.75, 15.82,  2.60],
+  ["邮储银行","601658", 0.65, 4.40, 9.80, 0.90, 286.15, 5.80, 94.37,  9.21,  0.90],
+  ["交通银行","601328", 0.60, 5.10, 9.80, 1.31, 201.94, 5.70, 92.30, 10.25,  1.60],
+  // ── 股份行（2025年报）──
+  ["招商银行","600036", 1.05, 4.20,13.44, 0.94, 391.79, 7.10, 89.99, 14.86,  1.21],
+  ["兴业银行","601166", 0.63, 4.40, 9.60, 1.08, 228.41, 5.70, 91.39,  9.60,  0.34],
+  ["中信银行","601998", 0.63, 4.20, 9.90, 1.15, 203.61, 5.90, 91.61,  9.45,  2.98],
+  ["浦发银行","600000", 0.56, 3.10, 6.50, 1.26, 195.00, 6.70, 92.09,  8.79, 23.31],
+  ["光大银行","601818", 0.51, 4.50, 8.10, 1.25, 174.44, 5.30, 91.85,  9.40, -3.00],
+  ["平安银行","000001", 0.54, 4.90, 9.80, 1.06, 236.53, 4.80, 91.24,  9.41, -4.19],
+  ["华夏银行","600015", 0.41, 5.10, 8.50, 1.58, 149.33, 4.10, 91.84,  9.57,-14.04],
+  ["民生银行","600016", 0.35, 4.30, 5.00, 1.48, 143.00, 5.40, 91.44,  9.34, -9.85],
+  ["浙商银行","601916", 0.51, 4.70, 8.50, 1.38, 171.21, 5.30, 94.02,  8.38,  0.61],
+  // ── 城商行 ──
+  ["北京银行","601169", 0.50, 4.90, 8.70, 1.30, 198.08, 4.90, 91.88,  8.64, -2.44],
+  ["上海银行","601229", 0.66, 4.40, 9.80, 1.18, 255.00, 6.20, 92.08, 10.54,  3.30],
+  ["江苏银行","600919", 0.86, 4.50,13.60, 0.86, 343.51, 5.80, 92.80,  8.36,  8.05],
+  ["宁波银行","002142", 0.88, 3.10,13.00, 0.76, 373.16, 6.10, 93.05,  9.32,  8.13],
+  ["南京银行","601009", 0.76, 4.90,12.97, 0.83, 323.69, 5.50, 92.91,  8.89,  7.00],
+  // 杭州银行 2026Q1 最新数据
+  ["杭州银行","600926", 0.96, 3.40,16.00, 0.76, 481.39, 5.40, 93.43,  9.59, 10.09],
+  ["成都银行","601838", 0.99, 3.70,17.81, 0.68, 433.00, 5.70, 93.36,  8.40, 10.17],
+  ["苏州银行","601860", 0.81, 4.10,11.68, 0.83, 421.00, 7.00, 91.73,  9.80,  7.12],
+  ["长沙银行","601577", 0.58, 4.10,11.81, 1.18, 309.82, 4.60, 93.26,  9.74,  3.81],
+  ["贵阳银行","601997", 0.37, 4.60, 8.35, 1.59, 236.54, 4.10, 90.70, 12.64, -7.16],
+  ["齐鲁银行","601665", 0.81, 3.80,12.52, 1.09, 324.06, 5.80, 93.26, 10.25, 17.77],
+  ["青岛银行","002948", 0.78, 3.00,11.51, 1.13, 251.49, 6.20, 93.56,  8.96, 20.16],
+  ["重庆银行","601963", 0.75, 2.90,11.69, 1.17, 247.25, 7.30, 93.08,  9.12,  5.33],
+  ["西安银行","600928", 0.51, 2.50, 7.97, 1.61, 190.07, 6.10, 93.50,  9.36, 13.68],
+  ["厦门银行","601187", 0.64, 4.80, 9.36, 0.86, 313.57, 6.20, 92.16,  9.56,-14.21],
+  ["兰州银行","001227", 0.47, 4.00, 5.65, 1.73, 200.16, 6.70, 92.81,  8.37,  2.36],
+  ["郑州银行","002936", 0.41, 0.90, 3.21, 1.87, 191.16, 8.70, 92.00,  8.73,  4.98],
+  // ── 城农商行 ──
+  ["沪农商行","601825", 0.70, 4.10,10.53, 0.97, 339.27, 6.70, 91.62, 10.25,  0.34],
+  ["渝农商行","601077", 0.68, 3.90,10.18, 1.17, 363.30, 6.90, 91.59,  9.16,  6.25],
+  ["青农商行","002958", 0.53, 3.40, 7.62, 1.81, 246.76, 6.00, 91.89, 10.28, 11.24],
+  ["紫金银行","601860", 0.55, 3.30, 8.42, 1.24, 202.52, 6.00, 92.86, 10.50,  4.04],
+  // ── 农商行 ──
+  ["江阴银行","603323", 0.60, 4.20,11.55, 0.86, 350.00, 5.00, 90.76, 13.73, 13.38],
+  ["张家港行","002839", 0.60, 4.30,11.05, 0.94, 355.05, 5.20, 90.93, 10.91,  3.20],
+  ["瑞丰银行","601528", 0.58, 3.50,10.83, 0.97, 326.08, 5.10, 91.66, 12.85, 11.27],
+  ["无锡银行","600908", 0.62, 3.50,10.62, 0.78, 424.87, 5.40, 91.09, 11.53,  3.13],
+  ["苏农银行","603323", 0.64, 3.80,11.17, 0.88, 370.19, 5.00, 91.72, 10.77,  5.04],
+  ["常熟银行","601128", 0.83, 3.00,14.15, 0.76, 462.95, 5.60, 91.87, 10.78, 12.82],
+];
+
+// ══════════════════════════════════════════════════
+// 8维评分计算
+// 维度：PB(低好)、股息率(高好)、杠杆率(低好)、核心资本充足率(高好)
+//       净利润增速(高好)、不良率(低好)、拨备覆盖率(高好)、ROE(高好)
+// 方法：每个维度按42家排名，排名之和 = 8维总分（越低越好）
+// ══════════════════════════════════════════════════
+function calcScores(banks){
+  const n = banks.length;
+  function rankAsc(field){  // 值越小排名越靠前（rank=1最好）
+    const sorted=[...banks].sort((a,b)=>a[field]-b[field]);
+    sorted.forEach((b,i)=>b['r_'+field]=i+1);
+  }
+  function rankDesc(field){ // 值越大排名越靠前
+    const sorted=[...banks].sort((a,b)=>b[field]-a[field]);
+    sorted.forEach((b,i)=>b['r_'+field]=i+1);
+  }
+  rankAsc('pb');    // PB越低越好
+  rankDesc('dy');   // 股息率越高越好
+  rankAsc('lev');   // 杠杆率越低越好
+  rankDesc('cap');  // 核心资本充足率越高越好
+  rankDesc('npg');  // 净利润增速越高越好
+  rankAsc('npl');   // 不良率越低越好
+  rankDesc('prov'); // 拨备覆盖率越高越好
+  rankDesc('roe');  // ROE越高越好
+
+  banks.forEach(b=>{
+    b.score8 = b.r_pb + b.r_dy + b.r_lev + b.r_cap + b.r_npg + b.r_npl + b.r_prov + b.r_roe;
+  });
+
+  // 8维综合排名
+  const sorted=[...banks].sort((a,b)=>a.score8-b.score8);
+  sorted.forEach((b,i)=>b.rank8=i+1);
+}
+
+let BANKS=BASE.map(r=>({
+  name:r[0],code:r[1],pb:r[2],dy:r[3],roe:r[4],npl:r[5],
+  prov:r[6],pe:r[7],lev:r[8],cap:r[9],npg:r[10],
+  price:null,chg:null,chgA:null,live:false,
+  score8:0,rank8:0,
+  r_pb:0,r_dy:0,r_lev:0,r_cap:0,r_npg:0,r_npl:0,r_prov:0,r_roe:0
+}));
+
+calcScores(BANKS);
+
+let sel=null,sk='score8',sd=1,sk2='score8',sd2=1,filters=new Set(),curTab='rank';
+
+// ══════════════════════════════════════════════════
+// 东方财富 JSONP 行情
+// ══════════════════════════════════════════════════
+function jsonp(url,cb){
+  return new Promise((res,rej)=>{
+    const t=setTimeout(()=>{cleanup();rej(new Error('超时'));},10000);
+    function cleanup(){clearTimeout(t);delete window[cb];const s=document.getElementById(cb);if(s)s.remove();}
+    window[cb]=data=>{cleanup();res(data);};
+    const s=document.createElement('script');
+    s.id=cb; s.onerror=()=>{cleanup();rej(new Error('加载失败'));};
+    s.src=url; document.head.appendChild(s);
+  });
+}
+
+async function loadData(){
+  const btn=document.getElementById('rfBtn');
+  btn.disabled=true; btn.textContent='加载中…';
+  sp(10,'连接行情…');
+
+  try{
+    const secids=BANKS.map(b=>(b.code.startsWith('6')||b.code.startsWith('5')?'SH':'SZ')+b.code);
+    const half=Math.ceil(secids.length/2);
+
+    sp(20,'获取行情 1/2…');
+    await fetchEM(secids.slice(0,half));
+    sp(60,'获取行情 2/2…');
+    await fetchEM(secids.slice(half));
+
+    const liveN=BANKS.filter(b=>b.live).length;
+    sp(100,'');
+    updateStats(); render();
+    document.getElementById('uptime').textContent=fmtTime();
+    document.getElementById('live-dot').className=liveN>0?'live-dot on':'live-dot fail';
+    liveN>0?hideNotice():showNotice('warn','⚠ 行情暂时无法获取（非交易时段或网络限制），显示 2024年报/2025最新季报。');
+  }catch(e){
+    sp(100,'');
+    updateStats(); render();
+    document.getElementById('live-dot').className='live-dot fail';
+    showNotice('err','⚠ 请求失败：'+e.message+'\n显示 2024年报/2025最新季报，可点↻重试。');
+  }
+  btn.disabled=false; btn.textContent='↻ 刷新';
+  setTimeout(()=>document.getElementById('splash').classList.add('hide'),300);
+}
+
+async function fetchEM(secids){
+  const cb='em'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+  const url=`https://push2.eastmoney.com/api/qt/ulist.np/get?cb=${cb}&secids=${secids.join(',')}&fields=f2,f3,f4,f12&ut=fa5fd1943c7b386f172d6893dbfba10b&_=${Date.now()}`;
+  const data=await jsonp(url,cb);
+  (data?.data?.diff||[]).forEach(item=>{
+    if(!item?.f12) return;
+    const code=String(item.f12).padStart(6,'0');
+    const b=BANKS.find(x=>x.code===code);
+    if(!b) return;
+    const p=item.f2!=null&&item.f2!=='-'?item.f2/100:null;
+    if(p&&p>0){b.price=p;b.chg=item.f3!=null&&item.f3!=='-'?item.f3/100:null;b.chgA=item.f4!=null&&item.f4!=='-'?item.f4/100:null;b.live=true;}
+  });
+}
+
+// ══════════════════════════════════════════════════
+// 渲染
+// ══════════════════════════════════════════════════
+function filtered(){
+  const q=document.getElementById('srch').value.trim().toLowerCase();
+  return BANKS.filter(b=>{
+    if(q&&!b.name.includes(q)&&!b.code.includes(q)) return false;
+    if(filters.has('pb')&&b.pb>=0.65) return false;
+    if(filters.has('div')&&b.dy<4.5) return false;
+    if(filters.has('roe')&&b.roe<12) return false;
+    if(filters.has('top')&&b.rank8>15) return false;
+    return true;
+  });
+}
+
+function render(){
+  if(curTab==='rank') renderRank();
+  else renderScore();
+}
+
+function renderRank(){
+  let rows=filtered();
+  rows.sort((a,b)=>{
+    const av=a[sk]??(sd>0?Infinity:-Infinity);
+    const bv=b[sk]??(sd>0?Infinity:-Infinity);
+    return typeof av==='string'?av.localeCompare(bv)*sd:(av-bv)*sd;
+  });
+  document.getElementById('tb-rank').innerHTML=rows.map(b=>{
+    const isSel=sel&&sel.name===b.name;
+    const ps=b.price!=null?b.price.toFixed(2):'—';
+    const cs=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%':'—';
+    const cc=b.chg==null?'var(--t3)':b.chg>0?'var(--green)':'var(--red)';
+    const pbc=b.pb<0.55?'var(--green)':b.pb>0.9?'var(--red)':'var(--t2)';
+    const dyc=b.dy>4.8?'var(--green)':b.dy<2.5?'var(--t3)':'var(--t2)';
+    const rc=b.roe>13?'var(--green)':b.roe<7?'var(--red)':'var(--t2)';
+    const nc=b.npl<1.0?'var(--green)':b.npl>1.5?'var(--red)':'var(--t2)';
+    const sc=scoreColor(b.rank8);
+    const typ=isSt(b.name);
+    return`<tr class="${isSel?'sel':''}" onclick="openDw('${b.name}')">
+      <td><span class="ind ${b.live?'ind-on':'ind-off'}"></span><span class="bn">${b.name}</span><span class="tag ${typ?'tg-s':'tg-c'}">${typ?'全国':'城农'}</span><span class="bc">${b.code}</span></td>
+      <td><span class="sbadge" style="background:${sc.bg};color:${sc.fg}">#${b.rank8}</span></td>
+      <td style="color:var(--gold);font-weight:700">${ps}</td>
+      <td style="color:${cc};font-weight:700">${cs}</td>
+      <td style="color:${pbc};font-weight:700">${b.pb}</td>
+      <td style="color:${dyc}">${b.dy}%</td>
+      <td style="color:${rc};font-weight:700">${b.roe}</td>
+      <td style="color:${nc}">${b.npl}%</td>
+      <td>${b.pe}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderScore(){
+  let rows=filtered();
+  rows.sort((a,b)=>{
+    const av=a[sk2]??(sd2>0?Infinity:-Infinity);
+    const bv=b[sk2]??(sd2>0?Infinity:-Infinity);
+    return(av-bv)*sd2;
+  });
+  document.getElementById('tb-score').innerHTML=rows.map(b=>{
+    const sc=scoreColor(b.rank8);
+    const typ=isSt(b.name);
+    const rC=r=>r<=10?'var(--green)':r>=35?'var(--red)':'var(--t2)';
+    return`<tr onclick="openDw('${b.name}')">
+      <td><span class="bn" style="font-size:12px">${b.name}</span><span class="tag ${typ?'tg-s':'tg-c'}" style="font-size:7px">${typ?'全':'城'}</span></td>
+      <td><span class="sbadge" style="background:${sc.bg};color:${sc.fg};font-size:11px">${b.score8}</span></td>
+      <td style="color:${rC(b.r_pb)};font-weight:600">${b.r_pb}</td>
+      <td style="color:${rC(b.r_dy)};font-weight:600">${b.r_dy}</td>
+      <td style="color:${rC(b.r_lev)};font-weight:600">${b.r_lev}</td>
+      <td style="color:${rC(b.r_cap)};font-weight:600">${b.r_cap}</td>
+      <td style="color:${rC(b.r_npg)};font-weight:600">${b.r_npg}</td>
+      <td style="color:${rC(b.r_npl)};font-weight:600">${b.r_npl}</td>
+      <td style="color:${rC(b.r_prov)};font-weight:600">${b.r_prov}</td>
+      <td style="color:${rC(b.r_roe)};font-weight:600">${b.r_roe}</td>
+    </tr>`;
+  }).join('');
+}
+
+function scoreColor(rank){
+  if(rank<=10) return{bg:'rgba(22,163,74,.15)',fg:'#15803d'};
+  if(rank<=20) return{bg:'rgba(200,134,10,.15)',fg:'#92600a'};
+  if(rank<=30) return{bg:'rgba(100,116,139,.12)',fg:'#475569'};
+  return{bg:'rgba(220,38,38,.12)',fg:'#b91c1c'};
+}
+
+function updateStats(){
+  const live=BANKS.filter(b=>b.live);
+  document.getElementById('p-u').textContent=live.length?live.filter(b=>b.chg>0).length:'—';
+  document.getElementById('p-d').textContent=live.length?live.filter(b=>b.chg<0).length:'—';
+  document.getElementById('p-pb').textContent=(BANKS.reduce((s,b)=>s+b.pb,0)/BANKS.length).toFixed(2)+'x';
+  document.getElementById('p-dy').textContent=(BANKS.reduce((s,b)=>s+b.dy,0)/BANKS.length).toFixed(2)+'%';
+  document.getElementById('p-pe').textContent=(BANKS.reduce((s,b)=>s+b.pe,0)/BANKS.length).toFixed(1)+'x';
+}
+
+// ══════════════════════════════════════════════════
+// 详情抽屉
+// ══════════════════════════════════════════════════
+function openDw(name){
+  sel=BANKS.find(b=>b.name===name);
+  renderDw(); document.getElementById('dw').classList.add('open'); render();
+}
+function closeDw(){document.getElementById('dw').classList.remove('open');sel=null;render();}
+
+function renderDw(){
+  if(!sel) return;
+  const b=sel,typ=isSt(b.name);
+  const ps=b.price!=null?'¥'+b.price.toFixed(2):'¥—';
+  const ct=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%':'— 基础数据';
+  const cc=b.chg==null?'var(--t3)':b.chg>=0?'var(--green)':'var(--red)';
+  const sc=scoreColor(b.rank8);
+
+  // 8维条形图数据
+  const dims=[
+    {name:'PB',rank:b.r_pb,val:b.pb,unit:'x',good:b.pb<0.65},
+    {name:'股息率',rank:b.r_dy,val:b.dy,unit:'%',good:b.dy>4.5},
+    {name:'杠杆率',rank:b.r_lev,val:b.lev,unit:'%',good:b.lev<91.5},
+    {name:'核心资本',rank:b.r_cap,val:b.cap,unit:'%',good:b.cap>12},
+    {name:'利润增速',rank:b.r_npg,val:b.npg,unit:'%',good:b.npg>5},
+    {name:'不良率',rank:b.r_npl,val:b.npl,unit:'%',good:b.npl<1.0},
+    {name:'拨备率',rank:b.r_prov,val:b.prov,unit:'%',good:b.prov>350},
+    {name:'ROE',rank:b.r_roe,val:b.roe,unit:'%',good:b.roe>13},
+  ];
+
+  document.getElementById('dwb').innerHTML=`
+<div class="dh">
+  <div>
+    <div class="dh-name">${b.name}<span class="tag ${typ?'tg-s':'tg-c'}">${typ?'全国':'城农'}</span></div>
+    <div class="dh-code">${b.code} · ${b.live?'✦ 实时':'2025/05/26'}</div>
+  </div>
+  <div class="dh-r">
+    <div class="dh-price">${ps}</div>
+    <div class="dh-chg" style="color:${cc}">${ct}</div>
+  </div>
+</div>
+
+<div class="score-section">
+  <div class="score-hd">
+    <div>
+      <div class="score-title">8维综合评分</div>
+      <div style="color:var(--t3);font-size:10px;margin-top:2px">分数越低越优秀</div>
+    </div>
+    <div>
+      <div class="score-total" style="color:${sc.fg}">${b.score8}分</div>
+      <div class="score-rank">综合排名 <span style="color:${sc.fg};font-weight:700">#${b.rank8}</span> / 42</div>
+    </div>
+  </div>
+  <div class="dim-list">
+    ${dims.map(d=>{
+      const pct=Math.round((1-(d.rank-1)/41)*100);
+      const barColor=d.rank<=14?'var(--green)':d.rank<=28?'var(--gold)':'var(--red)';
+      return`<div class="dim-row">
+        <div class="dim-name">${d.name}</div>
+        <div class="dim-bar-wrap"><div class="dim-bar" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="dim-val" style="color:${barColor}">${d.val}${d.unit}</div>
+        <div class="dim-rank">#${d.rank}</div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>
+
+<div class="mg">
+  <div class="mc ${b.pb<0.6?'g':''}">
+    <div class="mc-l">市净率 PB</div>
+    <div class="mc-v" style="color:${b.pb<0.6?'var(--green)':b.pb>0.9?'var(--red)':'var(--text)'}">${b.pb}x</div>
+    <div class="mc-s">${b.pb<0.55?'深度低估':b.pb<0.65?'低估':b.pb>0.9?'偏贵':'合理'}</div>
+  </div>
+  <div class="mc ${b.dy>4.5?'g':''}">
+    <div class="mc-l">股息率</div>
+    <div class="mc-v" style="color:${b.dy>4.5?'var(--green)':b.dy<2.5?'var(--t3)':'var(--text)'}">${b.dy}%</div>
+    <div class="mc-s">${b.dy>5?'极高股息':b.dy>4.5?'高股息':b.dy>3.5?'正常':'偏低'}</div>
+  </div>
+  <div class="mc ${b.roe>13?'g':b.roe<7?'r':''}">
+    <div class="mc-l">ROE 2024</div>
+    <div class="mc-v" style="color:${b.roe>13?'var(--green)':b.roe<7?'var(--red)':'var(--text)'}">${b.roe}%</div>
+    <div class="mc-s">盈利能力</div>
+  </div>
+  <div class="mc ${b.npl<1.0?'g':b.npl>1.5?'r':''}">
+    <div class="mc-l">不良率</div>
+    <div class="mc-v" style="color:${b.npl<1.0?'var(--green)':b.npl>1.5?'var(--red)':'var(--text)'}">${b.npl}%</div>
+    <div class="mc-s">${b.npl<1.0?'资产优质':b.npl>1.5?'⚠ 需关注':'正常'}</div>
+  </div>
+  <div class="mc">
+    <div class="mc-l">拨备覆盖率</div>
+    <div class="mc-v">${b.prov}%</div>
+    <div class="mc-s">风险缓冲</div>
+  </div>
+  <div class="mc">
+    <div class="mc-l">PE-TTM</div>
+    <div class="mc-v">${b.pe}x</div>
+    <div class="mc-s">动态市盈率</div>
+  </div>
+</div>
+
+<div class="ai-box">
+  <div class="ai-hd"><span class="ai-dot"></span><span class="ai-title">AI 研究员</span></div>
+  <div class="qps">
+    <span class="qp" onclick="ask('综合评价${b.name}配置价值，8维总分${b.score8}排名#${b.rank8}，给出低配/标配/超配结论')">配置建议</span>
+    <span class="qp" onclick="ask('${b.name}在8个维度中哪些是优势，哪些是短板，如何看待')">优劣分析</span>
+    <span class="qp" onclick="ask('${b.name} PB${b.pb} 股息${b.dy}% 与同类银行横向比较')">横向比较</span>
+  </div>
+  <div class="ai-resp dim" id="ao">点击快捷分析或输入问题…</div>
+  <div class="ai-row">
+    <input class="ai-inp" id="ain" placeholder="自定义问题…" onkeydown="if(event.key==='Enter')sendAsk()">
+    <button class="ai-btn" id="ago" onclick="sendAsk()">发送</button>
+  </div>
+</div>`;
+}
+
+// ══════════════════════════════════════════════════
+// AI 分析
+// ══════════════════════════════════════════════════
+const SUM=BANKS.map(b=>`${b.name}:8维${b.score8}分#${b.rank8} PB${b.pb} 股息${b.dy}% ROE${b.roe}% 不良${b.npl}%`).join('; ');
+async function ask(q){
+  const ao=document.getElementById('ao'),ago=document.getElementById('ago');
+  if(!ao||!sel) return;
+  ao.className='ai-resp dim'; ao.textContent='▌ 分析中…'; ago.disabled=true;
+  const b=sel;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:800,
+        system:`你是A股银行股研究员，专注高股息价值投资。8维评分体系（分越低越好）：PB排名+股息率排名+杠杆率排名+核心资本充足率排名+净利润增速排名+不良率排名+拨备率排名+ROE排名之和。42家银行参考：${SUM}。回答200字内，给出明确结论。`,
+        messages:[{role:'user',content:`分析${b.name}(${b.code}): 8维总分${b.score8}(#${b.rank8}/42) PB${b.pb}(#${b.r_pb}) 股息${b.dy}%(#${b.r_dy}) ROE${b.roe}%(#${b.r_roe}) 不良${b.npl}%(#${b.r_npl}) 拨备${b.prov}%(#${b.r_prov}) 利润增速${b.npg}%(#${b.r_npg})。${q}`}]
+      })
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    ao.className='ai-resp';
+    ao.textContent=(d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('')||'分析失败';
+  }catch(e){
+    ao.className='ai-resp'; ao.textContent='⚠ '+e.message;
+  }
+  ago.disabled=false;
+}
+function sendAsk(){const i=document.getElementById('ain');if(i?.value.trim()){ask(i.value.trim());i.value='';}}
+
+// ══════════════════════════════════════════════════
+// 工具函数
+// ══════════════════════════════════════════════════
+function isSt(n){return["招商","工商","建设","农业","中国","交通","邮储","中信","兴业","浦发","光大","民生","华夏","平安","浙商","北京","上海"].some(s=>n.includes(s));}
+function tf(k){const b=document.querySelector(`[onclick="tf('${k}')"]`);filters.has(k)?(filters.delete(k),b?.classList.remove('on')):(filters.add(k),b?.classList.add('on'));render();}
+function sb(k){sd=sk===k?-sd:(k==='score8'||k==='pb'||k==='npl'||k==='pe'?1:-1);sk=k;renderRank();}
+function sb2(k){sd2=sk2===k?-sd2:1;sk2=k;renderScore();}
+function switchTab(t){
+  curTab=t;
+  document.getElementById('tab-rank').className='tab'+(t==='rank'?' on':'');
+  document.getElementById('tab-score').className='tab'+(t==='score'?' on':'');
+  document.getElementById('view-rank').style.display=t==='rank'?'':'none';
+  document.getElementById('view-score').style.display=t==='score'?'':'none';
+  render();
+}
+function sp(p,m){document.getElementById('sp-fill').style.width=p+'%';document.getElementById('sp-msg').textContent=m;}
+function showNotice(type,m){const n=document.getElementById('notice');n.className='notice '+type;n.textContent=m;n.style.display='block';}
+function hideNotice(){document.getElementById('notice').style.display='none';}
+function fmtTime(){return new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});}
+
+document.addEventListener('click',e=>{
+  const dw=document.getElementById('dw');
+  if(dw.classList.contains('open')&&!dw.contains(e.target)&&!e.target.closest('tr')) closeDw();
+});
+
+updateStats(); render();
+document.getElementById('splash').classList.add('hide');
+showNotice('warn','📌 预览模式：数据来源 2024年报/2025最新季报，股息率为历史值。行情数据需在正常网络下部署到 GitHub Pages 后自动更新。
+</script>
+</body>
+</html>
