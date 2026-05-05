@@ -3,87 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>银行股8维评分器</title>
+<title>银行股11维评分器</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
 :root{
-  --bg:#f5f6f8;--s1:#ffffff;--s2:#f0f1f4;--border:#e0e2e8;--border2:#c8cad4;
+  --bg:#f5f6f8;--s1:#fff;--s2:#f0f1f4;--border:#e0e2e8;--border2:#c8cad4;
   --text:#1a1a2e;--t2:#3a3a5c;--t3:#7a7a9a;
-  --gold:#c8860a;--green:#16a34a;--red:#dc2626;--blue:#2563eb;
+  --gold:#c8860a;--green:#16a34a;--red:#dc2626;--blue:#2563eb;--orange:#ea580c;
   --font:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;}
 
-/* SPLASH */
-#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
-#splash.hide{opacity:0;pointer-events:none;}
-.sp-logo{font-size:22px;font-weight:700;color:var(--gold);letter-spacing:5px;}
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
+.sp-logo{font-size:20px;font-weight:700;color:var(--gold);letter-spacing:4px;}
 .sp-sub{color:var(--t3);font-size:11px;letter-spacing:2px;}
-.sp-bar{width:220px;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.sp-bar{width:200px;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;}
 .sp-fill{height:100%;background:var(--gold);width:0;transition:width .3s;}
 #sp-msg{color:var(--t3);font-size:11px;}
 
-/* HEADER */
-.hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:8px;}
-.logo{font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:6px;flex-wrap:wrap;}
+.logo{font-size:13px;font-weight:700;color:var(--gold);letter-spacing:2px;white-space:nowrap;}
 .logo em{color:var(--t3);font-style:normal;font-weight:400;font-size:11px;}
-.hd-r{display:flex;align-items:center;gap:10px;}
-.live-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);}
-.live-dot.on{background:var(--green);box-shadow:0 0 8px var(--green);}
-.live-dot.fail{background:var(--red);}
-#uptime{color:var(--t3);font-size:10px;}
-.rbtn{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:6px 12px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:11px;transition:all .2s;}
+.hd-r{display:flex;align-items:center;gap:7px;}
+.ldot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex-shrink:0;}
+.ldot.on{background:var(--green);box-shadow:0 0 7px var(--green);}
+.ldot.fail{background:var(--red);}
+#ts{color:var(--t3);font-size:10px;}
+.rbtn{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:5px 10px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .2s;white-space:nowrap;}
 .rbtn:hover{border-color:var(--gold);color:var(--gold);}
 .rbtn:disabled{opacity:.4;cursor:default;}
+.rbtn.orange{border-color:var(--orange);color:var(--orange);}
+.rbtn.orange:hover{background:rgba(234,88,12,.08);}
 
-/* TABS */
-.tabs{display:flex;background:var(--s2);border-bottom:1px solid var(--border);}
-.tab{flex:1;padding:11px 8px;text-align:center;font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
-.tab.on{color:var(--gold);border-bottom-color:var(--gold);}
+/* 退出信号横幅 */
+.exit-banner{background:rgba(220,38,38,.07);border-bottom:2px solid var(--red);padding:8px 14px;font-size:11px;color:var(--red);display:none;}
+.exit-banner.show{display:block;}
+.exit-title{font-weight:700;margin-bottom:4px;}
 
-/* STATS */
 .stats{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
 .stats::-webkit-scrollbar{display:none;}
-.st{flex:1;min-width:64px;padding:8px 6px;border-right:1px solid var(--border);text-align:center;}
-.st-l{color:var(--t3);font-size:9px;margin-bottom:3px;}
-.st-v{font-size:13px;font-weight:700;}
+.si{flex:1;min-width:66px;padding:7px 6px;border-right:1px solid var(--border);text-align:center;}
+.si-l{color:var(--t3);font-size:9px;margin-bottom:3px;}
+.si-v{font-size:13px;font-weight:700;color:var(--text);}
+.si-v.up{color:var(--green);}
+.si-v.dn{color:var(--red);}
+.si-v.gold{color:var(--gold);}
 
-/* TOOLBAR */
-.toolbar{display:flex;gap:7px;padding:9px 13px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
-.srch{flex:1;min-width:120px;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 11px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
+.tb{display:flex;gap:7px;padding:9px 13px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+.srch{flex:1;min-width:110px;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
 .srch::placeholder{color:var(--t3);}
 .srch:focus{border-color:var(--gold);}
-.fb{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:6px 10px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .2s;white-space:nowrap;}
-.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:rgba(240,180,41,.07);}
+.fb{background:transparent;border:1px solid var(--border2);color:var(--t2);padding:5px 9px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:10px;transition:all .2s;white-space:nowrap;}
+.fb:hover,.fb.on{border-color:var(--gold);color:var(--gold);background:rgba(200,134,10,.06);}
+.fb.exit-f{border-color:var(--red);color:var(--red);}
+.fb.exit-f.on{background:rgba(220,38,38,.07);}
 
-/* NOTICE */
-.notice{margin:8px 13px;padding:10px 13px;border-radius:5px;font-size:11px;line-height:1.8;display:none;white-space:pre-line;}
+.notice{margin:7px 13px;padding:9px 12px;border-radius:5px;font-size:11px;line-height:1.7;display:none;white-space:pre-line;}
 .notice.warn{background:rgba(200,134,10,.08);border:1px solid rgba(200,134,10,.3);color:#92600a;}
-.notice.err{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.3);color:#b91c1c;}
 
-/* TABLE */
+/* 数据更新状态 */
+.data-info{display:flex;align-items:center;justify-content:space-between;padding:6px 13px;background:var(--s2);border-bottom:1px solid var(--border);font-size:10px;color:var(--t3);}
+.data-date{font-weight:600;}
+.data-src{color:var(--t3);}
+
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-table{width:100%;border-collapse:collapse;min-width:620px;}
+table{width:100%;border-collapse:collapse;min-width:660px;}
 thead{position:sticky;top:0;z-index:10;}
-th{background:var(--s1);color:var(--t3);padding:8px 9px;text-align:right;font-size:10px;font-weight:600;border-bottom:2px solid var(--border2);cursor:pointer;white-space:nowrap;user-select:none;transition:color .15s;}
+th{background:var(--s1);color:var(--t3);padding:8px 8px;text-align:right;font-size:10px;font-weight:600;border-bottom:2px solid var(--border2);cursor:pointer;white-space:nowrap;user-select:none;}
 th:first-child{text-align:left;padding-left:13px;}
 th.sk,th:hover{color:var(--gold);}
-td{padding:8px 9px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap;color:var(--t2);}
+td{padding:8px 8px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap;color:var(--t2);}
 td:first-child{text-align:left;padding-left:13px;}
 tr{cursor:pointer;}
-tr:hover td{background:rgba(200,134,10,.06);}
-tr.sel td{background:rgba(200,134,10,.1);}
+tr:hover td{background:rgba(200,134,10,.04);}
+tr.sel td{background:rgba(200,134,10,.08);}
+/* 退出信号行 */
+tr.exit-row td{background:rgba(220,38,38,.04);}
+tr.exit-row td:first-child{border-left:3px solid var(--red);}
+
 .bn{font-weight:700;color:var(--text);font-size:13px;}
 .bc{color:var(--t3);font-size:9px;display:block;margin-top:1px;}
-.tag{display:inline-block;padding:1px 5px;border-radius:2px;font-size:8px;font-weight:700;margin-left:4px;vertical-align:middle;}
+.tag{display:inline-block;padding:1px 5px;border-radius:2px;font-size:8px;font-weight:700;margin-left:3px;vertical-align:middle;}
 .tg-s{background:rgba(200,134,10,.15);color:#92600a;}
 .tg-c{background:rgba(37,99,235,.12);color:#1d4ed8;}
 .ind{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:5px;vertical-align:middle;}
 .ind-on{background:var(--green);}
 .ind-off{background:var(--t3);}
+.exit-tag{display:inline-block;padding:1px 5px;border-radius:2px;font-size:8px;font-weight:700;background:rgba(220,38,38,.15);color:var(--red);margin-left:4px;vertical-align:middle;}
 
-/* SCORE BADGE */
 .sbadge{display:inline-block;min-width:28px;padding:2px 6px;border-radius:4px;font-weight:700;font-size:12px;text-align:center;}
 
 /* DRAWER */
@@ -93,35 +101,41 @@ tr.sel td{background:rgba(200,134,10,.1);}
 .dw-x{position:absolute;top:10px;right:14px;background:transparent;border:none;color:var(--t3);font-size:24px;cursor:pointer;line-height:1;padding:0 6px;}
 .dw-body{padding:6px 15px 48px;}
 
-/* DETAIL */
-.dh{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:13px;margin-bottom:13px;border-bottom:1px solid var(--border);}
-.dh-l{}
-.dh-name{font-size:20px;font-weight:700;}
-.dh-code{color:var(--t3);font-size:10px;margin-top:3px;}
-.dh-r{text-align:right;}
-.dh-price{font-size:24px;font-weight:700;color:var(--gold);}
-.dh-chg{font-size:12px;margin-top:3px;}
+/* 退出信号卡片 */
+.exit-card{background:rgba(220,38,38,.06);border:2px solid var(--red);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.exit-card-title{font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px;}
+.exit-item{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(220,38,38,.15);}
+.exit-item:last-child{border-bottom:none;}
+.exit-label{color:var(--t2);}
+.exit-price{font-weight:700;color:var(--red);}
+.hold-card{background:rgba(22,163,74,.06);border:2px solid var(--green);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.hold-card-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.hold-sub{font-size:11px;color:var(--t3);}
 
-/* 8维雷达替代：条形 */
-.score-section{margin-bottom:16px;}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border);}
+.dh-name{font-size:19px;font-weight:700;}
+.dh-code{color:var(--t3);font-size:10px;margin-top:3px;}
+.dh-price{font-size:22px;font-weight:700;color:var(--gold);text-align:right;}
+.dh-chg{font-size:12px;margin-top:3px;text-align:right;}
+
+/* 11维条形图 */
 .score-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.score-title{font-size:12px;font-weight:700;color:var(--t2);}
 .score-total{font-size:22px;font-weight:700;color:var(--gold);}
-.score-rank{font-size:11px;color:var(--t3);margin-top:1px;text-align:right;}
-.dim-list{display:flex;flex-direction:column;gap:7px;}
-.dim-row{display:flex;align-items:center;gap:8px;}
-.dim-name{color:var(--t3);font-size:10px;width:68px;flex-shrink:0;}
-.dim-bar-wrap{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden;}
-.dim-bar{height:100%;border-radius:3px;transition:width .4s;}
-.dim-val{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0;}
-.dim-rank{color:var(--t3);font-size:10px;width:30px;text-align:right;flex-shrink:0;}
+.score-rank{font-size:11px;color:var(--t3);text-align:right;}
+.dim-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.dim-row{display:flex;align-items:center;gap:7px;}
+.dim-name{color:var(--t3);font-size:10px;width:60px;flex-shrink:0;}
+.dim-bar-wrap{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.dim-bar{height:100%;border-radius:3px;}
+.dim-val{font-size:11px;font-weight:700;width:42px;text-align:right;flex-shrink:0;}
+.dim-rank{color:var(--t3);font-size:10px;width:28px;text-align:right;flex-shrink:0;}
 
 .mg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;}
 .mc{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
-.mc.g{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04);}
-.mc.r{border-color:rgba(239,68,68,.25);}
+.mc.g{border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.04);}
+.mc.r{border-color:rgba(220,38,38,.25);}
 .mc-l{color:var(--t3);font-size:10px;font-weight:600;margin-bottom:4px;}
-.mc-v{font-size:16px;font-weight:700;}
+.mc-v{font-size:15px;font-weight:700;color:var(--text);}
 .mc-s{color:var(--t3);font-size:10px;margin-top:3px;}
 
 /* AI */
@@ -131,24 +145,28 @@ tr.sel td{background:rgba(200,134,10,.1);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 .ai-title{color:var(--t2);font-size:12px;font-weight:600;}
 .qps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-.qp{background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;}
+.qp{background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:4px 11px;font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;}
 .qp:hover{border-color:var(--gold);color:var(--gold);}
 .ai-resp{font-size:12px;line-height:1.9;color:var(--t2);white-space:pre-wrap;min-height:48px;}
 .ai-resp.dim{color:var(--t3);}
 .ai-row{display:flex;gap:7px;margin-top:10px;}
-.ai-inp{flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 11px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
+.ai-inp{flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;}
 .ai-inp::placeholder{color:var(--t3);}
 .ai-inp:focus{border-color:var(--gold);}
-.ai-btn{background:var(--gold);border:none;color:#1a1000;padding:7px 15px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;}
+.ai-btn{background:var(--gold);border:none;color:#1a1000;padding:7px 14px;border-radius:4px;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;}
 .ai-btn:disabled{opacity:.35;cursor:default;}
 
-/* SCORE TABLE TAB */
-.score-tab-wrap{padding:12px;}
-.score-tab-title{font-size:12px;color:var(--t3);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.score-table{}
-.score-table table{min-width:340px;}
-.score-table th{font-size:10px;}
-.score-table td{font-size:11px;}
+/* 刷新基本面 modal */
+#refresh-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+#refresh-modal.show{display:flex;}
+.rm-box{background:var(--s1);border-radius:14px 14px 0 0;padding:20px 16px 40px;width:100%;max-width:600px;}
+.rm-title{font-size:15px;font-weight:700;margin-bottom:8px;}
+.rm-sub{font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.7;}
+.rm-progress{background:var(--s2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;color:var(--t2);line-height:1.8;min-height:80px;}
+.rm-btns{display:flex;gap:8px;}
+.rm-btn{flex:1;padding:10px;border-radius:6px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;border:none;}
+.rm-start{background:var(--gold);color:#1a1000;}
+.rm-cancel{background:var(--s2);color:var(--t2);}
 
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);}
@@ -157,89 +175,67 @@ tr.sel td{background:rgba(200,134,10,.1);}
 <body>
 
 <div id="splash">
-  <div class="sp-logo">BANK · 8D</div>
-  <div class="sp-sub">银行股8维评分系统</div>
+  <div class="sp-logo">BANK·11D</div>
+  <div class="sp-sub">银行股11维评分系统</div>
   <div class="sp-bar"><div class="sp-fill" id="sp-fill"></div></div>
   <div id="sp-msg">初始化...</div>
 </div>
 
 <div class="hd">
-  <div class="logo">BANK·8D <em>/ 评分系统</em></div>
+  <div class="logo">BANK·11D <em>/ 退出机制</em></div>
   <div class="hd-r">
-    <div class="live-dot" id="live-dot"></div>
-    <div id="uptime">--</div>
-    <button class="rbtn" id="rfBtn" onclick="loadData()">↻ 刷新</button>
+    <div class="ldot" id="ldot"></div>
+    <div id="ts">--</div>
+    <button class="rbtn" id="rfBtn" onclick="loadPrice()">↻ 行情</button>
+    <button class="rbtn orange" onclick="showRefreshModal()">↻ 基本面</button>
   </div>
 </div>
 
-<div class="tabs">
-  <div class="tab on" onclick="switchTab('rank')" id="tab-rank">综合排名</div>
-  <div class="tab" onclick="switchTab('score')" id="tab-score">8维明细</div>
+<div class="exit-banner" id="exit-banner">
+  <div class="exit-title">⚠ 退出信号提醒</div>
+  <div id="exit-list"></div>
 </div>
 
 <div class="stats">
-  <div class="st"><div class="st-l">银行数</div><div class="st-v" style="color:var(--gold)" id="p-n">42</div></div>
-  <div class="st"><div class="st-l">上涨</div><div class="st-v" style="color:var(--green)" id="p-u">—</div></div>
-  <div class="st"><div class="st-l">下跌</div><div class="st-v" style="color:var(--red)" id="p-d">—</div></div>
-  <div class="st"><div class="st-l">均PB</div><div class="st-v" id="p-pb">—</div></div>
-  <div class="st"><div class="st-l">均股息</div><div class="st-v" style="color:var(--gold)" id="p-dy">—</div></div>
-  <div class="st"><div class="st-l">均PE</div><div class="st-v" id="p-pe">—</div></div>
+  <div class="si"><div class="si-l">银行数</div><div class="si-v gold" id="p-n">42</div></div>
+  <div class="si"><div class="si-l">上涨</div><div class="si-v up" id="p-u">—</div></div>
+  <div class="si"><div class="si-l">下跌</div><div class="si-v dn" id="p-d">—</div></div>
+  <div class="si"><div class="si-l">均PB</div><div class="si-v" id="p-pb">—</div></div>
+  <div class="si"><div class="si-l">均股息</div><div class="si-v gold" id="p-dy">—</div></div>
+  <div class="si"><div class="si-l">国债</div><div class="si-v" id="p-bond">1.75%</div></div>
 </div>
 
-<div class="toolbar">
+<div class="tb">
   <input class="srch" id="srch" placeholder="搜索银行…" oninput="render()">
   <button class="fb" onclick="tf('pb')">低PB</button>
   <button class="fb" onclick="tf('div')">高股息</button>
-  <button class="fb" onclick="tf('roe')">优ROE</button>
-  <button class="fb" onclick="tf('top')">8维精选</button>
+  <button class="fb" onclick="tf('top')">11维精选</button>
+  <button class="fb exit-f" onclick="tf('exit')">⚠退出信号</button>
+</div>
+
+<div class="data-info">
+  <span class="data-date" id="data-date">基础数据：2025年报</span>
+  <span class="data-src" id="data-src">点「↻ 基本面」更新至最新季报</span>
 </div>
 
 <div class="notice" id="notice"></div>
 
-<!-- 综合排名视图 -->
-<div id="view-rank">
 <div class="tw">
 <table>
   <thead><tr>
     <th onclick="sb('name')">银行</th>
-    <th onclick="sb('score8')" class="sk">8维分↑</th>
+    <th onclick="sb('score11')" class="sk">11维↑</th>
     <th onclick="sb('price')">现价</th>
-    <th onclick="sb('chg')">涨跌</th>
+    <th onclick="sb('chg')">涨跌%</th>
     <th onclick="sb('pb')">PB</th>
     <th onclick="sb('dy')">股息%</th>
     <th onclick="sb('roe')">ROE</th>
+    <th onclick="sb('nim')">息差%</th>
     <th onclick="sb('npl')">不良%</th>
-    <th onclick="sb('pe')">PE</th>
+    <th onclick="sb('pettm')">PE</th>
   </tr></thead>
-  <tbody id="tb-rank"></tbody>
+  <tbody id="tb-main"></tbody>
 </table>
-</div>
-</div>
-
-<!-- 8维明细视图 -->
-<div id="view-score" style="display:none">
-<div class="score-tab-wrap">
-  <div class="score-tab-title">8维评分明细（分数越低越好，综合排名靠前）</div>
-  <div class="score-table">
-  <div class="tw">
-  <table>
-    <thead><tr>
-      <th onclick="sb2('name')">银行</th>
-      <th onclick="sb2('score8')" class="sk">总分</th>
-      <th onclick="sb2('r_pb')">PB排</th>
-      <th onclick="sb2('r_dy')">股息排</th>
-      <th onclick="sb2('r_lev')">负债排</th>
-      <th onclick="sb2('r_cap')">资本排</th>
-      <th onclick="sb2('r_npg')">增速排</th>
-      <th onclick="sb2('r_npl')">不良排</th>
-      <th onclick="sb2('r_prov')">拨备排</th>
-      <th onclick="sb2('r_roe')">ROE排</th>
-    </tr></thead>
-    <tbody id="tb-score"></tbody>
-  </table>
-  </div>
-  </div>
-</div>
 </div>
 
 <!-- 详情抽屉 -->
@@ -249,246 +245,425 @@ tr.sel td{background:rgba(200,134,10,.1);}
   <div class="dw-body" id="dwb"></div>
 </div>
 
+<!-- 刷新基本面 Modal -->
+<div id="refresh-modal">
+  <div class="rm-box">
+    <div class="rm-title">↻ 更新基本面数据</div>
+    <div class="rm-sub">通过 Claude AI 搜索最新季报数据（净息差、RORWA、关注类贷款等11维指标），约需3-5分钟，建议在WiFi下操作。</div>
+    <div class="rm-progress" id="rm-prog">准备就绪，点击开始更新...</div>
+    <div class="rm-btns">
+      <button class="rm-btn rm-start" id="rm-start-btn" onclick="startFundamentalsRefresh()">开始更新</button>
+      <button class="rm-btn rm-cancel" onclick="closeRefreshModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ══════════════════════════════════════════════════
-// 基础数据 2025-05-26
-// [name,code,pb,dy,roe,npl,prov,pe,ed,lev,core,npg]
-// lev=杠杆负债率(资产负债率), core=核心资本充足率, npg=净利润增速
-// ══════════════════════════════════════════════════
-// 数据来源：2026年一季报 / 2025年报（取最新可得数据）
-// 更新时间：2026年5月1日
-// 字段：[name,code,pb,dy,roe,npl,prov,pe,lev,cap,npg]
+// ══════════════════════════════════════════
+// 基础数据（2025年报 / 2026Q1最新）
+// [name,code, pb,dy,roe,npl,prov,pettm, lev,cap,npg, nim,rorwa,attn]
+// nim=净息差%, rorwa=RORWA%, attn=关注类贷款占比%
+// ══════════════════════════════════════════
 const BASE=[
-  // ── 国有六大行（2025年报）──
-  ["工商银行","601398", 0.72, 5.00, 9.40, 1.33, 214.91, 6.20, 92.12, 13.89,  1.60],
-  ["农业银行","601288", 0.78, 4.80,10.16, 1.30, 299.61, 5.70, 92.99, 11.23,  4.70],
-  ["建设银行","601939", 0.74, 4.80,10.50, 1.34, 233.60, 6.00, 92.03, 13.98,  1.50],
-  ["中国银行","601988", 0.70, 4.70, 9.80, 1.25, 200.60, 6.40, 91.75, 15.82,  2.60],
-  ["邮储银行","601658", 0.65, 4.40, 9.80, 0.90, 286.15, 5.80, 94.37,  9.21,  0.90],
-  ["交通银行","601328", 0.60, 5.10, 9.80, 1.31, 201.94, 5.70, 92.30, 10.25,  1.60],
-  // ── 股份行（2025年报）──
-  ["招商银行","600036", 1.05, 4.20,13.44, 0.94, 391.79, 7.10, 89.99, 14.86,  1.21],
-  ["兴业银行","601166", 0.63, 4.40, 9.60, 1.08, 228.41, 5.70, 91.39,  9.60,  0.34],
-  ["中信银行","601998", 0.63, 4.20, 9.90, 1.15, 203.61, 5.90, 91.61,  9.45,  2.98],
-  ["浦发银行","600000", 0.56, 3.10, 6.50, 1.26, 195.00, 6.70, 92.09,  8.79, 23.31],
-  ["光大银行","601818", 0.51, 4.50, 8.10, 1.25, 174.44, 5.30, 91.85,  9.40, -3.00],
-  ["平安银行","000001", 0.54, 4.90, 9.80, 1.06, 236.53, 4.80, 91.24,  9.41, -4.19],
-  ["华夏银行","600015", 0.41, 5.10, 8.50, 1.58, 149.33, 4.10, 91.84,  9.57,-14.04],
-  ["民生银行","600016", 0.35, 4.30, 5.00, 1.48, 143.00, 5.40, 91.44,  9.34, -9.85],
-  ["浙商银行","601916", 0.51, 4.70, 8.50, 1.38, 171.21, 5.30, 94.02,  8.38,  0.61],
-  // ── 城商行 ──
-  ["北京银行","601169", 0.50, 4.90, 8.70, 1.30, 198.08, 4.90, 91.88,  8.64, -2.44],
-  ["上海银行","601229", 0.66, 4.40, 9.80, 1.18, 255.00, 6.20, 92.08, 10.54,  3.30],
-  ["江苏银行","600919", 0.86, 4.50,13.60, 0.86, 343.51, 5.80, 92.80,  8.36,  8.05],
-  ["宁波银行","002142", 0.88, 3.10,13.00, 0.76, 373.16, 6.10, 93.05,  9.32,  8.13],
-  ["南京银行","601009", 0.76, 4.90,12.97, 0.83, 323.69, 5.50, 92.91,  8.89,  7.00],
-  // 杭州银行 2026Q1 最新数据
-  ["杭州银行","600926", 0.96, 3.40,16.00, 0.76, 481.39, 5.40, 93.43,  9.59, 10.09],
-  ["成都银行","601838", 0.99, 3.70,17.81, 0.68, 433.00, 5.70, 93.36,  8.40, 10.17],
-  ["苏州银行","601860", 0.81, 4.10,11.68, 0.83, 421.00, 7.00, 91.73,  9.80,  7.12],
-  ["长沙银行","601577", 0.58, 4.10,11.81, 1.18, 309.82, 4.60, 93.26,  9.74,  3.81],
-  ["贵阳银行","601997", 0.37, 4.60, 8.35, 1.59, 236.54, 4.10, 90.70, 12.64, -7.16],
-  ["齐鲁银行","601665", 0.81, 3.80,12.52, 1.09, 324.06, 5.80, 93.26, 10.25, 17.77],
-  ["青岛银行","002948", 0.78, 3.00,11.51, 1.13, 251.49, 6.20, 93.56,  8.96, 20.16],
-  ["重庆银行","601963", 0.75, 2.90,11.69, 1.17, 247.25, 7.30, 93.08,  9.12,  5.33],
-  ["西安银行","600928", 0.51, 2.50, 7.97, 1.61, 190.07, 6.10, 93.50,  9.36, 13.68],
-  ["厦门银行","601187", 0.64, 4.80, 9.36, 0.86, 313.57, 6.20, 92.16,  9.56,-14.21],
-  ["兰州银行","001227", 0.47, 4.00, 5.65, 1.73, 200.16, 6.70, 92.81,  8.37,  2.36],
-  ["郑州银行","002936", 0.41, 0.90, 3.21, 1.87, 191.16, 8.70, 92.00,  8.73,  4.98],
-  // ── 城农商行 ──
-  ["沪农商行","601825", 0.70, 4.10,10.53, 0.97, 339.27, 6.70, 91.62, 10.25,  0.34],
-  ["渝农商行","601077", 0.68, 3.90,10.18, 1.17, 363.30, 6.90, 91.59,  9.16,  6.25],
-  ["青农商行","002958", 0.53, 3.40, 7.62, 1.81, 246.76, 6.00, 91.89, 10.28, 11.24],
-  ["紫金银行","601860", 0.55, 3.30, 8.42, 1.24, 202.52, 6.00, 92.86, 10.50,  4.04],
-  // ── 农商行 ──
-  ["江阴银行","002807", 0.60, 4.20,11.55, 0.86, 350.00, 5.00, 90.76, 13.73, 13.38],
-  ["张家港行","002839", 0.60, 4.30,11.05, 0.94, 355.05, 5.20, 90.93, 10.91,  3.20],
-  ["瑞丰银行","601528", 0.58, 3.50,10.83, 0.97, 326.08, 5.10, 91.66, 12.85, 11.27],
-  ["无锡银行","600908", 0.62, 3.50,10.62, 0.78, 424.87, 5.40, 91.09, 11.53,  3.13],
-  ["苏农银行","603323", 0.64, 3.80,11.17, 0.88, 370.19, 5.00, 91.72, 10.77,  5.04],
-  ["常熟银行","601128", 0.83, 3.00,14.15, 0.76, 462.95, 5.60, 91.87, 10.78, 12.82],
+ //国有六大行
+ ["工商银行","601398",0.72,5.00,9.40,1.33,214.91,6.20,92.12,13.89,1.60,  1.42,1.10,2.48],
+ ["农业银行","601288",0.78,4.80,10.16,1.30,299.61,5.70,92.99,11.23,4.70,  1.41,0.95,2.35],
+ ["建设银行","601939",0.74,4.80,10.50,1.34,233.60,6.00,92.03,13.98,1.50,  1.49,1.07,2.20],
+ ["中国银行","601988",0.70,4.70,9.80,1.25,200.60,6.40,91.75,15.82,2.60,  1.26,0.89,1.47],
+ ["邮储银行","601658",0.65,4.40,9.80,0.90,286.15,5.80,94.37,9.21,0.90,   1.87,0.78,0.84],
+ ["交通银行","601328",0.60,5.10,9.80,1.31,201.94,5.70,92.30,10.25,1.60,  1.27,0.85,1.95],
+ //股份行
+ ["招商银行","600036",1.05,4.20,13.44,0.94,391.79,7.10,89.99,14.86,1.21, 1.87,1.54,1.47],
+ ["兴业银行","601166",0.63,4.40,9.60,1.08,228.41,5.70,91.39,9.60,0.34,   1.68,0.93,2.20],
+ ["中信银行","601998",0.63,4.20,9.90,1.15,203.61,5.90,91.61,9.45,2.98,   1.58,0.98,2.35],
+ ["浦发银行","600000",0.56,3.10,6.50,1.26,195.00,6.70,92.09,8.79,23.31,  1.44,0.68,3.10],
+ ["光大银行","601818",0.51,4.50,8.10,1.25,174.44,5.30,91.85,9.40,-3.00,  1.52,0.76,2.89],
+ ["平安银行","000001",0.54,4.90,9.80,1.06,236.53,4.80,91.24,9.41,-4.19,  1.87,1.02,1.98],
+ ["华夏银行","600015",0.41,5.10,8.50,1.58,149.33,4.10,91.84,9.57,-14.04, 1.60,0.72,3.58],
+ ["民生银行","600016",0.35,4.30,5.00,1.48,143.00,5.40,91.44,9.34,-9.85,  1.45,0.54,4.29],
+ ["浙商银行","601916",0.51,4.70,8.50,1.38,171.21,5.30,94.02,8.38,0.61,   1.70,0.80,2.75],
+ //城商行
+ ["北京银行","601169",0.50,4.90,8.70,1.30,198.08,4.90,91.88,8.64,-2.44,  1.42,0.85,2.54],
+ ["上海银行","601229",0.66,4.40,9.80,1.18,254.92,6.20,92.08,10.54,3.30,  1.20,0.96,2.18],
+ ["江苏银行","600919",0.86,4.50,13.60,0.86,343.51,5.80,92.80,8.36,8.05,  1.79,1.42,1.65],
+ ["宁波银行","002142",0.88,3.10,13.00,0.76,373.16,6.10,93.05,9.32,8.13,  1.88,1.38,0.98],
+ ["南京银行","601009",0.76,4.90,12.97,0.83,323.69,5.50,92.91,8.89,7.00,  1.88,1.28,1.45],
+ ["杭州银行","600926",0.96,3.40,16.00,0.76,481.39,5.40,93.43,9.59,10.09, 1.37,1.61,0.97],
+ ["成都银行","601838",0.99,3.70,17.81,0.68,433.00,5.70,93.36,8.40,10.17, 1.45,1.73,0.55],
+ ["苏州银行","601860",0.81,4.10,11.68,0.83,421.00,7.00,91.73,9.80,7.12,  1.77,1.19,1.40],
+ ["长沙银行","601577",0.58,4.10,11.81,1.18,309.82,4.60,93.26,9.74,3.81,  1.74,1.08,1.88],
+ ["贵阳银行","601997",0.37,4.60,8.35,1.59,236.54,4.10,90.70,12.64,-7.16, 1.60,0.70,4.20],
+ ["齐鲁银行","601665",0.81,3.80,12.52,1.09,324.06,5.80,93.26,10.25,17.77,1.72,1.21,1.82],
+ ["青岛银行","002948",0.78,3.00,11.51,1.13,251.49,6.20,93.56,8.96,20.16, 1.68,1.08,2.05],
+ ["重庆银行","601963",0.75,2.90,11.69,1.17,247.25,7.30,93.08,9.12,5.33,  1.68,1.10,2.40],
+ ["西安银行","600928",0.51,2.50,7.97,1.61,190.07,6.10,93.50,9.36,13.68,  1.85,0.78,3.15],
+ ["厦门银行","601187",0.64,4.80,9.36,0.86,313.57,6.20,92.16,9.56,-14.21, 1.09,0.88,1.62],
+ ["兰州银行","001227",0.47,4.00,5.65,1.73,200.16,6.70,92.81,8.37,2.36,   1.68,0.55,4.80],
+ ["郑州银行","002936",0.41,0.90,3.21,1.87,191.16,8.70,92.00,8.73,4.98,   1.32,0.35,6.50],
+ //城农商行
+ ["沪农商行","601825",0.70,4.10,10.53,0.97,339.27,6.70,91.62,10.25,0.34, 1.64,1.03,1.75],
+ ["渝农商行","601077",0.68,3.90,10.18,1.17,363.30,6.90,91.59,9.16,6.25,  1.71,1.01,2.20],
+ ["青农商行","002958",0.53,3.40,7.62,1.81,246.76,6.00,91.89,10.28,11.24, 1.78,0.78,3.20],
+ ["紫金银行","601860",0.55,3.30,8.42,1.24,202.52,6.00,92.86,10.50,4.04,  1.18,0.82,2.85],
+ //农商行
+ ["江阴银行","002807",0.60,4.20,11.55,0.86,350.00,5.00,90.76,13.73,13.38,2.24,1.21,1.40],
+ ["张家港行","002839",0.60,4.30,11.05,0.94,355.05,5.20,90.93,10.91,3.20, 2.05,1.16,1.65],
+ ["瑞丰银行","601528",0.58,3.50,10.83,0.97,326.08,5.10,91.66,12.85,11.27,2.18,1.12,1.80],
+ ["无锡银行","600908",0.62,3.50,10.62,0.78,424.87,5.40,91.09,11.53,3.13, 2.10,1.18,1.20],
+ ["苏农银行","603323",0.64,3.80,11.17,0.88,370.19,5.00,91.72,10.77,5.04, 2.15,1.15,1.55],
+ ["常熟银行","601128",0.83,3.00,14.15,0.76,462.95,5.60,91.87,10.78,12.82,2.53,1.38,1.30],
 ];
 
-// ══════════════════════════════════════════════════
-// 8维评分计算
-// 维度：PB(低好)、股息率(高好)、杠杆率(低好)、核心资本充足率(高好)
-//       净利润增速(高好)、不良率(低好)、拨备覆盖率(高好)、ROE(高好)
-// 方法：每个维度按42家排名，排名之和 = 8维总分（越低越好）
-// ══════════════════════════════════════════════════
-function calcScores(banks){
-  const n = banks.length;
-  function rankAsc(field){  // 值越小排名越靠前（rank=1最好）
-    const sorted=[...banks].sort((a,b)=>a[field]-b[field]);
-    sorted.forEach((b,i)=>b['r_'+field]=i+1);
-  }
-  function rankDesc(field){ // 值越大排名越靠前
-    const sorted=[...banks].sort((a,b)=>b[field]-a[field]);
-    sorted.forEach((b,i)=>b['r_'+field]=i+1);
-  }
-  rankAsc('pb');    // PB越低越好
-  rankDesc('dy');   // 股息率越高越好
-  rankAsc('lev');   // 杠杆率越低越好
-  rankDesc('cap');  // 核心资本充足率越高越好
-  rankDesc('npg');  // 净利润增速越高越好
-  rankAsc('npl');   // 不良率越低越好
-  rankDesc('prov'); // 拨备覆盖率越高越好
-  rankDesc('roe');  // ROE越高越好
+// 国债利率（10年期，用于退出机制计算）
+let BOND_RATE = 1.75; // %
 
-  banks.forEach(b=>{
-    b.score8 = b.r_pb + b.r_dy + b.r_lev + b.r_cap + b.r_npg + b.r_npl + b.r_prov + b.r_roe;
-  });
-
-  // 8维综合排名
-  const sorted=[...banks].sort((a,b)=>a.score8-b.score8);
-  sorted.forEach((b,i)=>b.rank8=i+1);
-}
-
-let BANKS=BASE.map(r=>({
-  name:r[0],code:r[1],pb:r[2],dy:r[3],roe:r[4],npl:r[5],
-  prov:r[6],pe:r[7],lev:r[8],cap:r[9],npg:r[10],
+let BANKS = BASE.map(r=>({
+  name:r[0],code:r[1],
+  pb:r[2],dy:r[3],roe:r[4],npl:r[5],prov:r[6],pettm:r[7],
+  lev:r[8],cap:r[9],npg:r[10],
+  nim:r[11],rorwa:r[12],attn:r[13],
   price:null,chg:null,chgA:null,live:false,
-  score8:0,rank8:0,
-  r_pb:0,r_dy:0,r_lev:0,r_cap:0,r_npg:0,r_npl:0,r_prov:0,r_roe:0
+  score11:0,rank11:0,
+  exitSignals:[],  // 退出信号列表
+  targetPrices:{}, // 各条件对应目标价
+  r_pb:0,r_dy:0,r_lev:0,r_cap:0,r_npg:0,r_npl:0,r_prov:0,r_roe:0,r_nim:0,r_rorwa:0,r_attn:0
 }));
 
-calcScores(BANKS);
+// ══════════════════════════════════════════
+// 11维评分计算
+// ══════════════════════════════════════════
+function calcScores(){
+  const N = BANKS.length;
+  function rankAsc(f){ const s=[...BANKS].sort((a,b)=>a[f]-b[f]); s.forEach((b,i)=>b['r_'+f]=i+1); }
+  function rankDesc(f){ const s=[...BANKS].sort((a,b)=>b[f]-a[f]); s.forEach((b,i)=>b['r_'+f]=i+1); }
 
-let sel=null,sk='score8',sd=1,sk2='score8',sd2=1,filters=new Set(),curTab='rank';
+  rankAsc('pb');    // PB低好
+  rankDesc('dy');   // 股息高好
+  rankAsc('lev');   // 负债率低好
+  rankDesc('rorwa');// RORWA高好
+  rankAsc('attn');  // 关注类贷款占比低好
+  rankDesc('npg');  // 净利润增速高好
+  rankAsc('npl');   // 不良率低好
+  rankDesc('prov'); // 拨备率高好
+  rankDesc('roe');  // ROE高好
+  rankDesc('nim');  // 净息差高好
+  rankDesc('cap');  // 核心资本充足率高好
 
-// ══════════════════════════════════════════════════
-// 东方财富 JSONP 行情
-// ══════════════════════════════════════════════════
-// 从 GitHub 仓库读取 data.json（由 Actions 每日更新）
-// ══════════════════════════════════════════════════
-async function loadData(){
-  const btn=document.getElementById('rfBtn');
-  btn.disabled=true; btn.textContent='加载中…';
-  sp(30,'读取行情数据…');
-
-  // 先显示静态数据
-  updateStats(); render();
-
-  try{
-    // 读取同目录下的 data.json
-    const r = await fetch('./data.json?t=' + Date.now());
-    if(!r.ok) throw new Error('data.json 未找到');
-    const d = await r.json();
-
-    if(!d.quotes) throw new Error('数据格式错误');
-
-    // 写入行情
-    let liveN = 0;
-    BANKS.forEach(b=>{
-      const q = d.quotes[b.code];
-      if(q && q.price > 0){
-        b.price = q.price;
-        b.chg = q.chg;
-        b.chgA = q.chgA;
-        b.live = true;
-        liveN++;
-      }
-    });
-
-    updateStats(); render();
-    const upd = d.updated || '未知';
-    document.getElementById('uptime').textContent = upd;
-    document.getElementById('live-dot').className = liveN>0 ? 'live-dot on' : 'live-dot fail';
-
-    if(liveN > 0){
-      hideNotice();
-    } else {
-      showNotice('warn', '⚠ 数据文件存在但无行情，可能是非交易日。');
-    }
-  } catch(e){
-    document.getElementById('live-dot').className = 'live-dot fail';
-    showNotice('warn', '⚠ 暂无实时行情（data.json 尚未生成）。\n首次需等 GitHub Actions 在交易日 16:30 自动运行后才有数据。\n也可在仓库 Actions 页面手动触发。');
-  }
-  btn.disabled=false; btn.textContent='↻ 刷新';
+  BANKS.forEach(b=>{
+    b.score11 = b.r_pb+b.r_dy+b.r_lev+b.r_rorwa+b.r_attn+b.r_npg+b.r_npl+b.r_prov+b.r_roe+b.r_nim+b.r_cap;
+  });
+  [...BANKS].sort((a,b)=>a.score11-b.score11).forEach((b,i)=>b.rank11=i+1);
 }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════
+// 退出机制计算（yyb凌波版本）
+// 满足以下任一条件则生成退出信号+目标价
+// ══════════════════════════════════════════
+function calcExitSignals(){
+  // 排名前10的PB均值（PB₁₀）
+  const top10pb = [...BANKS].sort((a,b)=>a.pb-b.pb).slice(0,10);
+  const pb10 = top10pb.reduce((s,b)=>s+b.pb,0)/10;
+  
+  // 排名第10的PB值
+  const pb10th = top10pb[9].pb;
+  
+  // 2倍国债利率（用于股息率退出判断）
+  const threshold_dy = BOND_RATE * 2; // 约3.50%
+
+  BANKS.forEach(b=>{
+    b.exitSignals = [];
+    b.targetPrices = {};
+
+    if(!b.price) return;
+
+    // 条件1：PB > PB₁₀均值（超过前10均值）
+    // 目标价 = 当前每股净资产 × PB₁₀均值
+    const bvps = b.price / b.pb; // 每股净资产估算
+    const tp1 = +(bvps * pb10).toFixed(2);
+    if(b.pb > pb10){
+      b.exitSignals.push('PB超前10均值');
+      b.targetPrices['PB均值'] = tp1;
+    }
+
+    // 条件2：PB排名进入前10
+    const tp2 = +(bvps * pb10th).toFixed(2);
+    if(b.r_pb <= 10){
+      b.exitSignals.push('PB进前10');
+      b.targetPrices['PB前10'] = tp2;
+    }
+
+    // 条件3：股息率 < 2倍国债利率
+    // 目标价 = 年分红 / (2×国债利率)
+    const annualDiv = b.price * (b.dy/100); // 年分红估算
+    const tp3 = +(annualDiv / (threshold_dy/100)).toFixed(2);
+    if(b.dy < threshold_dy){
+      b.exitSignals.push(`股息率<${threshold_dy.toFixed(2)}%`);
+      b.targetPrices['股息率'] = tp3;
+    }
+  });
+
+  // 更新退出信号横幅
+  const exitBanks = BANKS.filter(b=>b.exitSignals.length>0 && b.price);
+  const banner = document.getElementById('exit-banner');
+  const exitList = document.getElementById('exit-list');
+  if(exitBanks.length>0){
+    exitList.innerHTML = exitBanks.map(b=>
+      `<span style="margin-right:12px"><b>${b.name}</b> ${b.exitSignals.join('/')} ` +
+      `目标价: ${Object.values(b.targetPrices).map(p=>'¥'+p).join('/')}</span>`
+    ).join('');
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// ══════════════════════════════════════════
+// 行情加载（从 data.json）
+// ══════════════════════════════════════════
+async function loadPrice(){
+  const btn=document.getElementById('rfBtn');
+  btn.disabled=true; btn.textContent='加载中…';
+
+  try{
+    const r=await fetch('./data.json?t='+Date.now());
+    if(!r.ok) throw new Error('data.json未找到');
+    const d=await r.json();
+    let n=0;
+    BANKS.forEach(b=>{
+      const q=d.quotes?.[b.code];
+      if(q?.price>0){ b.price=q.price; b.chg=q.chg; b.chgA=q.chgA; b.live=true; n++; }
+    });
+    document.getElementById('ts').textContent=d.updated||fmtTime();
+    document.getElementById('ldot').className=n>0?'ldot on':'ldot fail';
+    if(n===0) showNotice('暂无实时行情，显示基础数据。在GitHub Actions手动触发一次可获取最新价格。');
+    else hideNotice();
+  }catch(e){
+    document.getElementById('ldot').className='ldot fail';
+    showNotice('行情文件未找到，显示基础数据。');
+  }
+
+  calcExitSignals();
+  updateStats(); render();
+  btn.disabled=false; btn.textContent='↻ 行情';
+}
+
+// ══════════════════════════════════════════
+// 基本面刷新（Claude API 搜索最新数据）
+// ══════════════════════════════════════════
+let refreshRunning = false;
+
+function showRefreshModal(){ document.getElementById('refresh-modal').classList.add('show'); }
+function closeRefreshModal(){
+  if(refreshRunning) return;
+  document.getElementById('refresh-modal').classList.remove('show');
+  document.getElementById('rm-prog').textContent='准备就绪，点击开始更新...';
+}
+
+async function startFundamentalsRefresh(){
+  if(refreshRunning) return;
+  refreshRunning = true;
+  const btn = document.getElementById('rm-start-btn');
+  btn.disabled = true; btn.textContent='更新中…';
+  const log = document.getElementById('rm-prog');
+
+  // 分批搜索，每批6家
+  const batches = [];
+  for(let i=0;i<BANKS.length;i+=6) batches.push(BANKS.slice(i,i+6));
+
+  let done=0, success=0;
+  log.textContent='开始搜索最新季报数据...\n';
+
+  for(const batch of batches){
+    const names = batch.map(b=>b.name).join('、');
+    log.textContent += `搜索: ${names}...\n`;
+
+    try{
+      const result = await fetchFundamentals(batch);
+      if(result){ success++; }
+      log.textContent += `✓ 完成 ${names}\n`;
+    }catch(e){
+      log.textContent += `✗ 失败: ${e.message}\n`;
+    }
+
+    done += batch.length;
+    await sleep(500);
+  }
+
+  // 同时更新国债利率
+  log.textContent += '\n搜索当前国债利率...\n';
+  try{
+    await fetchBondRate();
+    log.textContent += `✓ 10年期国债利率: ${BOND_RATE}%\n`;
+  }catch(e){
+    log.textContent += `✗ 国债利率更新失败，使用${BOND_RATE}%\n`;
+  }
+
+  calcScores();
+  calcExitSignals();
+  updateStats(); render();
+
+  const now = new Date().toLocaleDateString('zh-CN');
+  document.getElementById('data-date').textContent = `数据已更新: ${now}`;
+  document.getElementById('data-src').textContent = '最新季报数据';
+
+  log.textContent += `\n✅ 更新完成！成功 ${success}/${batches.length} 批次`;
+  btn.disabled=false; btn.textContent='重新更新';
+  refreshRunning=false;
+}
+
+async function fetchFundamentals(batch){
+  const list = batch.map(b=>`${b.name}(${b.code})`).join('、');
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1200,
+      tools:[{type:'web_search_20250305',name:'web_search'}],
+      system:`你是银行财务数据助手。搜索以下银行的最新财务数据（2025年报或2026Q1），返回严格JSON数组，不含任何说明文字。
+字段说明：
+- nim: 净息差(%)
+- rorwa: RORWA净利润/风险加权资产(%)
+- attn: 关注类贷款占比(%)
+- npl: 不良贷款率(%)
+- prov: 拨备覆盖率(%)
+- roe: ROE(%)
+- npg: 净利润增速(%)
+- dy: 股息率(%)
+- pb: 市净率
+格式示例：[{"code":"600036","nim":1.87,"rorwa":1.54,"attn":1.47,"npl":0.94,"prov":391.79,"roe":13.44,"npg":1.21,"dy":4.20,"pb":1.05}]
+找不到的字段填null，只返回JSON，不要其他文字。`,
+      messages:[{role:'user',content:`请搜索并返回以下银行最新财务数据：${list}`}]
+    })
+  });
+
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  const d = await resp.json();
+
+  // 处理多轮对话（web_search工具调用）
+  let messages = [{role:'user',content:`请搜索并返回以下银行最新财务数据：${list}`}];
+  messages.push({role:'assistant',content:d.content});
+
+  let finalData = d;
+  // 如果有tool_use，继续对话直到得到最终结果
+  if(d.stop_reason === 'tool_use'){
+    const toolUses = d.content.filter(c=>c.type==='tool_use');
+    const toolResults = toolUses.map(tu=>({
+      type:'tool_result', tool_use_id:tu.id, content:''
+    }));
+    messages.push({role:'user',content:toolResults});
+
+    const resp2 = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1200,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        system:`你是银行财务数据助手。返回严格JSON数组，不含任何说明文字。`,
+        messages
+      })
+    });
+    finalData = await resp2.json();
+  }
+
+  const text = (finalData.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').trim();
+  return parseAndApply(text, batch);
+}
+
+function parseAndApply(text, batch){
+  let arr = null;
+  try{ arr=JSON.parse(text); }catch(_){}
+  if(!arr){ const s=text.indexOf('['),e=text.lastIndexOf(']'); if(s!==-1&&e>s) try{arr=JSON.parse(text.slice(s,e+1));}catch(_){} }
+  if(!Array.isArray(arr)||!arr.length) return false;
+
+  let updated=0;
+  arr.forEach(item=>{
+    if(!item||!item.code) return;
+    const code=String(item.code).padStart(6,'0');
+    const b=BANKS.find(x=>x.code===code)||(item.name&&BANKS.find(x=>x.name===item.name));
+    if(!b) return;
+    if(item.nim!=null) b.nim=parseFloat(item.nim);
+    if(item.rorwa!=null) b.rorwa=parseFloat(item.rorwa);
+    if(item.attn!=null) b.attn=parseFloat(item.attn);
+    if(item.npl!=null) b.npl=parseFloat(item.npl);
+    if(item.prov!=null) b.prov=parseFloat(item.prov);
+    if(item.roe!=null) b.roe=parseFloat(item.roe);
+    if(item.npg!=null) b.npg=parseFloat(item.npg);
+    if(item.dy!=null) b.dy=parseFloat(item.dy);
+    if(item.pb!=null) b.pb=parseFloat(item.pb);
+    updated++;
+  });
+  return updated>0;
+}
+
+async function fetchBondRate(){
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:200,
+      tools:[{type:'web_search_20250305',name:'web_search'}],
+      system:'只返回一个数字，代表中国10年期国债当前收益率（%），例如：1.75',
+      messages:[{role:'user',content:'中国10年期国债收益率现在是多少？只返回数字。'}]
+    })
+  });
+  if(!resp.ok) return;
+  const d = await resp.json();
+  const text=(d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').trim();
+  const num=parseFloat(text.match(/[\d.]+/)?.[0]);
+  if(num>0.5&&num<10){ BOND_RATE=num; document.getElementById('p-bond').textContent=num+'%'; }
+}
+
+// ══════════════════════════════════════════
 // 渲染
-// ══════════════════════════════════════════════════
-function filtered(){
+// ══════════════════════════════════════════
+let sel=null,sk='score11',sd=1,filters=new Set();
+
+function render(){
   const q=document.getElementById('srch').value.trim().toLowerCase();
-  return BANKS.filter(b=>{
+  let rows=BANKS.filter(b=>{
     if(q&&!b.name.includes(q)&&!b.code.includes(q)) return false;
     if(filters.has('pb')&&b.pb>=0.65) return false;
     if(filters.has('div')&&b.dy<4.5) return false;
-    if(filters.has('roe')&&b.roe<12) return false;
-    if(filters.has('top')&&b.rank8>15) return false;
+    if(filters.has('top')&&b.rank11>15) return false;
+    if(filters.has('exit')&&b.exitSignals.length===0) return false;
     return true;
   });
-}
-
-function render(){
-  if(curTab==='rank') renderRank();
-  else renderScore();
-}
-
-function renderRank(){
-  let rows=filtered();
   rows.sort((a,b)=>{
     const av=a[sk]??(sd>0?Infinity:-Infinity);
     const bv=b[sk]??(sd>0?Infinity:-Infinity);
-    return typeof av==='string'?av.localeCompare(bv)*sd:(av-bv)*sd;
+    return(av-bv)*sd;
   });
-  document.getElementById('tb-rank').innerHTML=rows.map(b=>{
+
+  document.getElementById('tb-main').innerHTML=rows.map(b=>{
     const isSel=sel&&sel.name===b.name;
+    const hasExit=b.exitSignals.length>0&&b.price;
     const ps=b.price!=null?b.price.toFixed(2):'—';
     const cs=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%':'—';
     const cc=b.chg==null?'var(--t3)':b.chg>0?'var(--green)':'var(--red)';
-    const pbc=b.pb<0.55?'var(--green)':b.pb>0.9?'var(--red)':'var(--t2)';
-    const dyc=b.dy>4.8?'var(--green)':b.dy<2.5?'var(--t3)':'var(--t2)';
-    const rc=b.roe>13?'var(--green)':b.roe<7?'var(--red)':'var(--t2)';
-    const nc=b.npl<1.0?'var(--green)':b.npl>1.5?'var(--red)':'var(--t2)';
-    const sc=scoreColor(b.rank8);
+    const sc=scoreColor(b.rank11);
     const typ=isSt(b.name);
-    return`<tr class="${isSel?'sel':''}" onclick="openDw('${b.name}')">
-      <td><span class="ind ${b.live?'ind-on':'ind-off'}"></span><span class="bn">${b.name}</span><span class="tag ${typ?'tg-s':'tg-c'}">${typ?'全国':'城农'}</span><span class="bc">${b.code}</span></td>
-      <td><span class="sbadge" style="background:${sc.bg};color:${sc.fg}">#${b.rank8}</span></td>
+    const pbC=b.pb<0.55?'var(--green)':b.pb>0.9?'var(--red)':'var(--t2)';
+    const dyC=b.dy>4.8?'var(--green)':b.dy<2.5?'var(--t3)':'var(--t2)';
+    const roeC=b.roe>13?'var(--green)':b.roe<7?'var(--red)':'var(--t2)';
+    const nimC=b.nim>2.0?'var(--green)':b.nim<1.3?'var(--red)':'var(--t2)';
+    const nplC=b.npl<1.0?'var(--green)':b.npl>1.5?'var(--red)':'var(--t2)';
+    return`<tr class="${isSel?'sel':''}${hasExit?' exit-row':''}" onclick="openDw('${b.name}')">
+      <td><span class="ind ${b.live?'ind-on':'ind-off'}"></span><span class="bn">${b.name}</span><span class="tag ${typ?'tg-s':'tg-c'}">${typ?'全国':'城农'}</span>${hasExit?'<span class="exit-tag">退出</span>':''}<span class="bc">${b.code}</span></td>
+      <td><span class="sbadge" style="background:${sc.bg};color:${sc.fg}">#${b.rank11}</span></td>
       <td style="color:var(--gold);font-weight:700">${ps}</td>
       <td style="color:${cc};font-weight:700">${cs}</td>
-      <td style="color:${pbc};font-weight:700">${b.pb}</td>
-      <td style="color:${dyc}">${b.dy}%</td>
-      <td style="color:${rc};font-weight:700">${b.roe}</td>
-      <td style="color:${nc}">${b.npl}%</td>
-      <td>${b.pe}</td>
+      <td style="color:${pbC};font-weight:700">${b.pb}</td>
+      <td style="color:${dyC}">${b.dy}%</td>
+      <td style="color:${roeC};font-weight:700">${b.roe}</td>
+      <td style="color:${nimC}">${b.nim}%</td>
+      <td style="color:${nplC}">${b.npl}%</td>
+      <td>${b.pettm}</td>
     </tr>`;
   }).join('');
-}
-
-function renderScore(){
-  let rows=filtered();
-  rows.sort((a,b)=>{
-    const av=a[sk2]??(sd2>0?Infinity:-Infinity);
-    const bv=b[sk2]??(sd2>0?Infinity:-Infinity);
-    return(av-bv)*sd2;
-  });
-  document.getElementById('tb-score').innerHTML=rows.map(b=>{
-    const sc=scoreColor(b.rank8);
-    const typ=isSt(b.name);
-    const rC=r=>r<=10?'var(--green)':r>=35?'var(--red)':'var(--t2)';
-    return`<tr onclick="openDw('${b.name}')">
-      <td><span class="bn" style="font-size:12px">${b.name}</span><span class="tag ${typ?'tg-s':'tg-c'}" style="font-size:7px">${typ?'全':'城'}</span></td>
-      <td><span class="sbadge" style="background:${sc.bg};color:${sc.fg};font-size:11px">${b.score8}</span></td>
-      <td style="color:${rC(b.r_pb)};font-weight:600">${b.r_pb}</td>
-      <td style="color:${rC(b.r_dy)};font-weight:600">${b.r_dy}</td>
-      <td style="color:${rC(b.r_lev)};font-weight:600">${b.r_lev}</td>
-      <td style="color:${rC(b.r_cap)};font-weight:600">${b.r_cap}</td>
-      <td style="color:${rC(b.r_npg)};font-weight:600">${b.r_npg}</td>
-      <td style="color:${rC(b.r_npl)};font-weight:600">${b.r_npl}</td>
-      <td style="color:${rC(b.r_prov)};font-weight:600">${b.r_prov}</td>
-      <td style="color:${rC(b.r_roe)};font-weight:600">${b.r_roe}</td>
-    </tr>`;
-  }).join('');
-}
-
-function scoreColor(rank){
-  if(rank<=10) return{bg:'rgba(22,163,74,.15)',fg:'#15803d'};
-  if(rank<=20) return{bg:'rgba(200,134,10,.15)',fg:'#92600a'};
-  if(rank<=30) return{bg:'rgba(100,116,139,.12)',fg:'#475569'};
-  return{bg:'rgba(220,38,38,.12)',fg:'#b91c1c'};
 }
 
 function updateStats(){
@@ -497,73 +672,88 @@ function updateStats(){
   document.getElementById('p-d').textContent=live.length?live.filter(b=>b.chg<0).length:'—';
   document.getElementById('p-pb').textContent=(BANKS.reduce((s,b)=>s+b.pb,0)/BANKS.length).toFixed(2)+'x';
   document.getElementById('p-dy').textContent=(BANKS.reduce((s,b)=>s+b.dy,0)/BANKS.length).toFixed(2)+'%';
-  document.getElementById('p-pe').textContent=(BANKS.reduce((s,b)=>s+b.pe,0)/BANKS.length).toFixed(1)+'x';
+  document.getElementById('p-bond').textContent=BOND_RATE+'%';
 }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════
 // 详情抽屉
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════
 function openDw(name){
   sel=BANKS.find(b=>b.name===name);
   renderDw(); document.getElementById('dw').classList.add('open'); render();
 }
-function closeDw(){document.getElementById('dw').classList.remove('open');sel=null;render();}
+function closeDw(){ document.getElementById('dw').classList.remove('open'); sel=null; render(); }
 
 function renderDw(){
   if(!sel) return;
-  const b=sel,typ=isSt(b.name);
+  const b=sel, typ=isSt(b.name);
   const ps=b.price!=null?'¥'+b.price.toFixed(2):'¥—';
-  const ct=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%':'— 基础数据';
+  const ct=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%'+(b.chgA!=null?' ('+(b.chgA>0?'+':'')+b.chgA.toFixed(3)+')') :'— 基础数据';
   const cc=b.chg==null?'var(--t3)':b.chg>=0?'var(--green)':'var(--red)';
-  const sc=scoreColor(b.rank8);
+  const sc=scoreColor(b.rank11);
+  const hasExit=b.exitSignals.length>0&&b.price;
 
-  // 8维条形图数据
+  // 11维条形
   const dims=[
-    {name:'PB',rank:b.r_pb,val:b.pb,unit:'x',good:b.pb<0.65},
-    {name:'股息率',rank:b.r_dy,val:b.dy,unit:'%',good:b.dy>4.5},
-    {name:'杠杆率',rank:b.r_lev,val:b.lev,unit:'%',good:b.lev<91.5},
-    {name:'核心资本',rank:b.r_cap,val:b.cap,unit:'%',good:b.cap>12},
-    {name:'利润增速',rank:b.r_npg,val:b.npg,unit:'%',good:b.npg>5},
-    {name:'不良率',rank:b.r_npl,val:b.npl,unit:'%',good:b.npl<1.0},
-    {name:'拨备率',rank:b.r_prov,val:b.prov,unit:'%',good:b.prov>350},
-    {name:'ROE',rank:b.r_roe,val:b.roe,unit:'%',good:b.roe>13},
+    {name:'PB',rank:b.r_pb,val:b.pb,unit:'x'},
+    {name:'股息率',rank:b.r_dy,val:b.dy,unit:'%'},
+    {name:'负债率',rank:b.r_lev,val:b.lev,unit:'%'},
+    {name:'RORWA',rank:b.r_rorwa,val:b.rorwa,unit:'%'},
+    {name:'关注贷款',rank:b.r_attn,val:b.attn,unit:'%'},
+    {name:'利润增速',rank:b.r_npg,val:b.npg,unit:'%'},
+    {name:'不良率',rank:b.r_npl,val:b.npl,unit:'%'},
+    {name:'拨备率',rank:b.r_prov,val:b.prov,unit:'%'},
+    {name:'ROE',rank:b.r_roe,val:b.roe,unit:'%'},
+    {name:'净息差',rank:b.r_nim,val:b.nim,unit:'%'},
+    {name:'核心资本',rank:b.r_cap,val:b.cap,unit:'%'},
   ];
+
+  const exitHTML = hasExit ? `
+<div class="exit-card">
+  <div class="exit-card-title">⚠ 退出信号（满足${b.exitSignals.length}个条件）</div>
+  ${b.exitSignals.map((s,i)=>`<div class="exit-item"><span class="exit-label">${s}</span><span class="exit-price">目标价 ¥${Object.values(b.targetPrices)[i]||'—'}</span></div>`).join('')}
+</div>` : `
+<div class="hold-card">
+  <div class="hold-card-title">✅ 持有信号</div>
+  <div class="hold-sub">当前未触发退出条件（国债2倍=${(BOND_RATE*2).toFixed(2)}%，PB₁₀均值=${calcPB10().toFixed(3)}x）</div>
+</div>`;
 
   document.getElementById('dwb').innerHTML=`
 <div class="dh">
   <div>
     <div class="dh-name">${b.name}<span class="tag ${typ?'tg-s':'tg-c'}">${typ?'全国':'城农'}</span></div>
-    <div class="dh-code">${b.code} · ${b.live?'✦ 实时':'2025/05/26'}</div>
+    <div class="dh-code">${b.code} · ${b.live?'✦ 实时':'基础数据'}</div>
   </div>
-  <div class="dh-r">
+  <div>
     <div class="dh-price">${ps}</div>
     <div class="dh-chg" style="color:${cc}">${ct}</div>
   </div>
 </div>
 
-<div class="score-section">
-  <div class="score-hd">
-    <div>
-      <div class="score-title">8维综合评分</div>
-      <div style="color:var(--t3);font-size:10px;margin-top:2px">分数越低越优秀</div>
-    </div>
-    <div>
-      <div class="score-total" style="color:${sc.fg}">${b.score8}分</div>
-      <div class="score-rank">综合排名 <span style="color:${sc.fg};font-weight:700">#${b.rank8}</span> / 42</div>
-    </div>
+${exitHTML}
+
+<div class="score-hd">
+  <div>
+    <div style="font-size:12px;font-weight:700;color:var(--t2)">11维综合评分</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px">分数越低越好</div>
   </div>
-  <div class="dim-list">
-    ${dims.map(d=>{
-      const pct=Math.round((1-(d.rank-1)/41)*100);
-      const barColor=d.rank<=14?'var(--green)':d.rank<=28?'var(--gold)':'var(--red)';
-      return`<div class="dim-row">
-        <div class="dim-name">${d.name}</div>
-        <div class="dim-bar-wrap"><div class="dim-bar" style="width:${pct}%;background:${barColor}"></div></div>
-        <div class="dim-val" style="color:${barColor}">${d.val}${d.unit}</div>
-        <div class="dim-rank">#${d.rank}</div>
-      </div>`;
-    }).join('')}
+  <div>
+    <div class="score-total" style="color:${sc.fg}">${b.score11}分</div>
+    <div class="score-rank">排名 <span style="color:${sc.fg};font-weight:700">#${b.rank11}</span>/42</div>
   </div>
+</div>
+
+<div class="dim-list">
+${dims.map(d=>{
+  const pct=Math.round((1-(d.rank-1)/41)*100);
+  const bc=d.rank<=14?'var(--green)':d.rank<=28?'var(--gold)':'var(--red)';
+  return`<div class="dim-row">
+    <div class="dim-name">${d.name}</div>
+    <div class="dim-bar-wrap"><div class="dim-bar" style="width:${pct}%;background:${bc}"></div></div>
+    <div class="dim-val" style="color:${bc}">${d.val}${d.unit}</div>
+    <div class="dim-rank">#${d.rank}</div>
+  </div>`;
+}).join('')}
 </div>
 
 <div class="mg">
@@ -574,37 +764,37 @@ function renderDw(){
   </div>
   <div class="mc ${b.dy>4.5?'g':''}">
     <div class="mc-l">股息率</div>
-    <div class="mc-v" style="color:${b.dy>4.5?'var(--green)':b.dy<2.5?'var(--t3)':'var(--text)'}">${b.dy}%</div>
-    <div class="mc-s">${b.dy>5?'极高股息':b.dy>4.5?'高股息':b.dy>3.5?'正常':'偏低'}</div>
+    <div class="mc-v" style="color:${b.dy>4.5?'var(--green)':b.dy<(BOND_RATE*2)?'var(--red)':'var(--text)'}">${b.dy}%</div>
+    <div class="mc-s">${b.dy<BOND_RATE*2?'⚠ 低于2倍国债':b.dy>5?'极高股息':'正常'}</div>
   </div>
-  <div class="mc ${b.roe>13?'g':b.roe<7?'r':''}">
-    <div class="mc-l">ROE 2024</div>
-    <div class="mc-v" style="color:${b.roe>13?'var(--green)':b.roe<7?'var(--red)':'var(--text)'}">${b.roe}%</div>
-    <div class="mc-s">盈利能力</div>
+  <div class="mc">
+    <div class="mc-l">净息差 NIM</div>
+    <div class="mc-v" style="color:${b.nim>2?'var(--green)':b.nim<1.3?'var(--red)':'var(--text)'}">${b.nim}%</div>
+    <div class="mc-s">${b.nim>2?'高息差优势':b.nim<1.3?'息差偏低':'正常'}</div>
+  </div>
+  <div class="mc">
+    <div class="mc-l">RORWA</div>
+    <div class="mc-v" style="color:${b.rorwa>1.2?'var(--green)':b.rorwa<0.7?'var(--red)':'var(--text)'}">${b.rorwa}%</div>
+    <div class="mc-s">风险加权资产回报</div>
   </div>
   <div class="mc ${b.npl<1.0?'g':b.npl>1.5?'r':''}">
     <div class="mc-l">不良率</div>
     <div class="mc-v" style="color:${b.npl<1.0?'var(--green)':b.npl>1.5?'var(--red)':'var(--text)'}">${b.npl}%</div>
-    <div class="mc-s">${b.npl<1.0?'资产优质':b.npl>1.5?'⚠ 需关注':'正常'}</div>
+    <div class="mc-s">${b.npl<1.0?'资产优质':b.npl>1.5?'⚠需关注':'正常'}</div>
   </div>
   <div class="mc">
-    <div class="mc-l">拨备覆盖率</div>
-    <div class="mc-v">${b.prov}%</div>
-    <div class="mc-s">风险缓冲</div>
-  </div>
-  <div class="mc">
-    <div class="mc-l">PE-TTM</div>
-    <div class="mc-v">${b.pe}x</div>
-    <div class="mc-s">动态市盈率</div>
+    <div class="mc-l">关注类贷款</div>
+    <div class="mc-v" style="color:${b.attn<1.5?'var(--green)':b.attn>3?'var(--red)':'var(--text)'}">${b.attn}%</div>
+    <div class="mc-s">潜在风险敞口</div>
   </div>
 </div>
 
 <div class="ai-box">
   <div class="ai-hd"><span class="ai-dot"></span><span class="ai-title">AI 研究员</span></div>
   <div class="qps">
-    <span class="qp" onclick="ask('综合评价${b.name}配置价值，8维总分${b.score8}排名#${b.rank8}，给出低配/标配/超配结论')">配置建议</span>
-    <span class="qp" onclick="ask('${b.name}在8个维度中哪些是优势，哪些是短板，如何看待')">优劣分析</span>
-    <span class="qp" onclick="ask('${b.name} PB${b.pb} 股息${b.dy}% 与同类银行横向比较')">横向比较</span>
+    <span class="qp" onclick="ask('综合评价${b.name}的11维评分和退出机制状态，给出配置建议')">配置建议</span>
+    <span class="qp" onclick="ask('分析${b.name}的净息差${b.nim}%和RORWA${b.rorwa}%，说明盈利质量')">盈利质量</span>
+    <span class="qp" onclick="ask('${b.name}关注类贷款${b.attn}%，分析资产质量风险')">风险分析</span>
   </div>
   <div class="ai-resp dim" id="ao">点击快捷分析或输入问题…</div>
   <div class="ai-row">
@@ -614,10 +804,11 @@ function renderDw(){
 </div>`;
 }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════
 // AI 分析
-// ══════════════════════════════════════════════════
-const SUM=BANKS.map(b=>`${b.name}:8维${b.score8}分#${b.rank8} PB${b.pb} 股息${b.dy}% ROE${b.roe}% 不良${b.npl}%`).join('; ');
+// ══════════════════════════════════════════
+const SUM=BANKS.map(b=>`${b.name}:11维#${b.rank11} PB${b.pb} 股息${b.dy}% ROE${b.roe}% 息差${b.nim}% 不良${b.npl}%`).join('; ');
+
 async function ask(q){
   const ao=document.getElementById('ao'),ago=document.getElementById('ago');
   if(!ao||!sel) return;
@@ -628,51 +819,47 @@ async function ask(q){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:800,
-        system:`你是A股银行股研究员，专注高股息价值投资。8维评分体系（分越低越好）：PB排名+股息率排名+杠杆率排名+核心资本充足率排名+净利润增速排名+不良率排名+拨备率排名+ROE排名之和。42家银行参考：${SUM}。回答200字内，给出明确结论。`,
-        messages:[{role:'user',content:`分析${b.name}(${b.code}): 8维总分${b.score8}(#${b.rank8}/42) PB${b.pb}(#${b.r_pb}) 股息${b.dy}%(#${b.r_dy}) ROE${b.roe}%(#${b.r_roe}) 不良${b.npl}%(#${b.r_npl}) 拨备${b.prov}%(#${b.r_prov}) 利润增速${b.npg}%(#${b.r_npg})。${q}`}]
+        system:`你是A股银行股研究员，专注高股息价值投资，熟悉yyb凌波的退出机制（PB>前10均值/PB进前10/股息率<2倍国债利率）。42家银行参考：${SUM}。回答200字内，给出明确结论。`,
+        messages:[{role:'user',content:`分析${b.name}: 11维总分${b.score11}(#${b.rank11}/42) PB${b.pb}(#${b.r_pb}) 股息${b.dy}%(#${b.r_dy}) ROE${b.roe}% 息差${b.nim}% RORWA${b.rorwa}% 关注贷款${b.attn}% 不良${b.npl}% 拨备${b.prov}% 退出信号:${b.exitSignals.length>0?b.exitSignals.join('/'):'无'}。${q}`}]
       })
     });
     const d=await r.json();
     if(d.error) throw new Error(d.error.message);
     ao.className='ai-resp';
     ao.textContent=(d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('')||'分析失败';
-  }catch(e){
-    ao.className='ai-resp'; ao.textContent='⚠ '+e.message;
-  }
+  }catch(e){ ao.className='ai-resp'; ao.textContent='⚠ '+e.message; }
   ago.disabled=false;
 }
-function sendAsk(){const i=document.getElementById('ain');if(i?.value.trim()){ask(i.value.trim());i.value='';}}
+function sendAsk(){ const i=document.getElementById('ain'); if(i?.value.trim()){ask(i.value.trim());i.value='';} }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════
 // 工具函数
-// ══════════════════════════════════════════════════
-function isSt(n){return["招商","工商","建设","农业","中国","交通","邮储","中信","兴业","浦发","光大","民生","华夏","平安","浙商","北京","上海"].some(s=>n.includes(s));}
-function tf(k){const b=document.querySelector(`[onclick="tf('${k}')"]`);filters.has(k)?(filters.delete(k),b?.classList.remove('on')):(filters.add(k),b?.classList.add('on'));render();}
-function sb(k){sd=sk===k?-sd:(k==='score8'||k==='pb'||k==='npl'||k==='pe'?1:-1);sk=k;renderRank();}
-function sb2(k){sd2=sk2===k?-sd2:1;sk2=k;renderScore();}
-function switchTab(t){
-  curTab=t;
-  document.getElementById('tab-rank').className='tab'+(t==='rank'?' on':'');
-  document.getElementById('tab-score').className='tab'+(t==='score'?' on':'');
-  document.getElementById('view-rank').style.display=t==='rank'?'':'none';
-  document.getElementById('view-score').style.display=t==='score'?'':'none';
-  render();
-}
-function sp(p,m){document.getElementById('sp-fill').style.width=p+'%';document.getElementById('sp-msg').textContent=m;}
-function showNotice(type,m){const n=document.getElementById('notice');n.className='notice '+type;n.textContent=m;n.style.display='block';}
-function hideNotice(){document.getElementById('notice').style.display='none';}
-function fmtTime(){return new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});}
+// ══════════════════════════════════════════
+function calcPB10(){ return [...BANKS].sort((a,b)=>a.pb-b.pb).slice(0,10).reduce((s,b)=>s+b.pb,0)/10; }
+function isSt(n){ return["招商","工商","建设","农业","中国","交通","邮储","中信","兴业","浦发","光大","民生","华夏","平安","浙商","北京","上海"].some(s=>n.includes(s)); }
+function tf(k){ const b=document.querySelector(`[onclick="tf('${k}')"]`); filters.has(k)?(filters.delete(k),b?.classList.remove('on')):(filters.add(k),b?.classList.add('on')); render(); }
+function sb(k){ sd=sk===k?-sd:(k==='score11'||k==='pb'||k==='npl'||k==='attn'?1:-1); sk=k; render(); }
+function scoreColor(r){ if(r<=10)return{bg:'rgba(22,163,74,.15)',fg:'#15803d'}; if(r<=20)return{bg:'rgba(200,134,10,.15)',fg:'#92600a'}; if(r<=30)return{bg:'rgba(100,116,139,.12)',fg:'#475569'}; return{bg:'rgba(220,38,38,.12)',fg:'#b91c1c'}; }
+function showNotice(m){ const n=document.getElementById('notice'); n.className='notice warn'; n.textContent=m; n.style.display='block'; }
+function hideNotice(){ document.getElementById('notice').style.display='none'; }
+function fmtTime(){ return new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 document.addEventListener('click',e=>{
   const dw=document.getElementById('dw');
   if(dw.classList.contains('open')&&!dw.contains(e.target)&&!e.target.closest('tr')) closeDw();
+  const modal=document.getElementById('refresh-modal');
+  if(modal.classList.contains('show')&&!modal.querySelector('.rm-box').contains(e.target)) closeRefreshModal();
 });
 
-// 立即隐藏 splash，不等网络请求
-document.getElementById('splash').style.display = 'none';
-updateStats(); render();
-// 异步加载行情
-loadData();
+// ══════════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════════
+document.getElementById('splash').style.display='none';
+calcScores();
+updateStats();
+render();
+loadPrice();
 </script>
 </body>
 </html>
