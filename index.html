@@ -367,7 +367,6 @@ async function loadData(){
 
   // 先显示静态数据
   updateStats(); render();
-  setTimeout(()=>document.getElementById('splash').classList.add('hide'), 600);
 
   try{
     // 读取同目录下的 data.json
@@ -669,7 +668,11 @@ document.addEventListener('click',e=>{
   if(dw.classList.contains('open')&&!dw.contains(e.target)&&!e.target.closest('tr')) closeDw();
 });
 
-updateStats(); render(); loadData();
+// 立即隐藏 splash，不等网络请求
+document.getElementById('splash').style.display = 'none';
+updateStats(); render();
+// 异步加载行情
+loadData();
 </script>
 </body>
 </html>
