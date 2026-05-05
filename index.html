@@ -669,9 +669,7 @@ document.addEventListener('click',e=>{
   if(dw.classList.contains('open')&&!dw.contains(e.target)&&!e.target.closest('tr')) closeDw();
 });
 
-updateStats(); render();
-document.getElementById('splash').classList.add('hide');
-showNotice('warn','📌 预览模式：数据来源 2024年报/2025最新季报，股息率为历史值。行情数据需在正常网络下部署到 GitHub Pages 后自动更新。
+updateStats(); render(); loadData();
 </script>
 </body>
 </html>
