@@ -358,59 +358,53 @@ let sel=null,sk='score8',sd=1,sk2='score8',sd2=1,filters=new Set(),curTab='rank'
 // ══════════════════════════════════════════════════
 // 东方财富 JSONP 行情
 // ══════════════════════════════════════════════════
-function jsonp(url,cb){
-  return new Promise((res,rej)=>{
-    const t=setTimeout(()=>{cleanup();rej(new Error('超时'));},10000);
-    function cleanup(){clearTimeout(t);delete window[cb];const s=document.getElementById(cb);if(s)s.remove();}
-    window[cb]=data=>{cleanup();res(data);};
-    const s=document.createElement('script');
-    s.id=cb; s.onerror=()=>{cleanup();rej(new Error('加载失败'));};
-    s.src=url; document.head.appendChild(s);
-  });
-}
-
+// 从 GitHub 仓库读取 data.json（由 Actions 每日更新）
+// ══════════════════════════════════════════════════
 async function loadData(){
   const btn=document.getElementById('rfBtn');
   btn.disabled=true; btn.textContent='加载中…';
-  sp(10,'连接行情…');
+  sp(30,'读取行情数据…');
+
+  // 先显示静态数据
+  updateStats(); render();
+  setTimeout(()=>document.getElementById('splash').classList.add('hide'), 600);
 
   try{
-    const secids=BANKS.map(b=>(b.code.startsWith('6')||b.code.startsWith('5')?'SH':'SZ')+b.code);
-    const half=Math.ceil(secids.length/2);
+    // 读取同目录下的 data.json
+    const r = await fetch('./data.json?t=' + Date.now());
+    if(!r.ok) throw new Error('data.json 未找到');
+    const d = await r.json();
 
-    sp(20,'获取行情 1/2…');
-    await fetchEM(secids.slice(0,half));
-    sp(60,'获取行情 2/2…');
-    await fetchEM(secids.slice(half));
+    if(!d.quotes) throw new Error('数据格式错误');
 
-    const liveN=BANKS.filter(b=>b.live).length;
-    sp(100,'');
+    // 写入行情
+    let liveN = 0;
+    BANKS.forEach(b=>{
+      const q = d.quotes[b.code];
+      if(q && q.price > 0){
+        b.price = q.price;
+        b.chg = q.chg;
+        b.chgA = q.chgA;
+        b.live = true;
+        liveN++;
+      }
+    });
+
     updateStats(); render();
-    document.getElementById('uptime').textContent=fmtTime();
-    document.getElementById('live-dot').className=liveN>0?'live-dot on':'live-dot fail';
-    liveN>0?hideNotice():showNotice('warn','⚠ 行情暂时无法获取（非交易时段或网络限制），显示 2024年报/2025最新季报。');
-  }catch(e){
-    sp(100,'');
-    updateStats(); render();
-    document.getElementById('live-dot').className='live-dot fail';
-    showNotice('err','⚠ 请求失败：'+e.message+'\n显示 2024年报/2025最新季报，可点↻重试。');
+    const upd = d.updated || '未知';
+    document.getElementById('uptime').textContent = upd;
+    document.getElementById('live-dot').className = liveN>0 ? 'live-dot on' : 'live-dot fail';
+
+    if(liveN > 0){
+      hideNotice();
+    } else {
+      showNotice('warn', '⚠ 数据文件存在但无行情，可能是非交易日。');
+    }
+  } catch(e){
+    document.getElementById('live-dot').className = 'live-dot fail';
+    showNotice('warn', '⚠ 暂无实时行情（data.json 尚未生成）。\n首次需等 GitHub Actions 在交易日 16:30 自动运行后才有数据。\n也可在仓库 Actions 页面手动触发。');
   }
   btn.disabled=false; btn.textContent='↻ 刷新';
-  setTimeout(()=>document.getElementById('splash').classList.add('hide'),300);
-}
-
-async function fetchEM(secids){
-  const cb='em'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
-  const url=`https://push2.eastmoney.com/api/qt/ulist.np/get?cb=${cb}&secids=${secids.join(',')}&fields=f2,f3,f4,f12&ut=fa5fd1943c7b386f172d6893dbfba10b&_=${Date.now()}`;
-  const data=await jsonp(url,cb);
-  (data?.data?.diff||[]).forEach(item=>{
-    if(!item?.f12) return;
-    const code=String(item.f12).padStart(6,'0');
-    const b=BANKS.find(x=>x.code===code);
-    if(!b) return;
-    const p=item.f2!=null&&item.f2!=='-'?item.f2/100:null;
-    if(p&&p>0){b.price=p;b.chg=item.f3!=null&&item.f3!=='-'?item.f3/100:null;b.chgA=item.f4!=null&&item.f4!=='-'?item.f4/100:null;b.live=true;}
-  });
 }
 
 // ══════════════════════════════════════════════════
