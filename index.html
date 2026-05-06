@@ -688,7 +688,9 @@ function renderDw(){
   if(!sel) return;
   const b=sel, typ=isSt(b.name);
   const ps=b.price!=null?'¥'+b.price.toFixed(2):'¥—';
-  const ct=b.chg!=null?(b.chg>0?'+':'')+b.chg.toFixed(2)+'%'+(b.chgA!=null?' ('+(b.chgA>0?'+':'')+b.chgA.toFixed(3)+')') :'— 基础数据';
+  const ct=b.chg!=null
+    ? (b.chg>0?'+':'')+b.chg.toFixed(2)+'%'+(b.chgA!=null?' ('+(b.chgA>0?'+':'')+b.chgA.toFixed(3)+')':'')
+    : '— 基础数据';
   const cc=b.chg==null?'var(--t3)':b.chg>=0?'var(--green)':'var(--red)';
   const sc=scoreColor(b.rank11);
   const hasExit=b.exitSignals.length>0&&b.price;
